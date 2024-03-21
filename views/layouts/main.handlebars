@@ -7,71 +7,78 @@
       href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/css/menu_style.css" />k
+    <link rel="stylesheet" href="/css/menu_style.css" />
+    {{! <link rel="stylesheet" href="/css/menu_style_2.css" /> }}
 
+    <script src="/js/SideNavigationScript.js" defer></script>
     <title>{{title}}</title>
   </head>
   <body>
-    <div class="sidebar">
-      <div class="logo_content">
-        <div class="logo">
-          <i class="bx bxl-codepen"></i>
-          <div class="logo_name">KILL THE FOOD</div>
-        </div>
-        <box-icon name="menu" id="btn"></box-icon>
-      </div>
-      <ul class="nav_list">
-        <li>
-          <a href="#">
-            <i class="bx bx-search"></i>
-            <input type="text" placeholder="Search..." />
-          </a>
-          <span class="tooltip">Search</span>
-        </li>
-        <li>
-          <a href="/">
-            <i class="bx bx-home"></i>
-            <span class="links_name">Home</span>
-          </a>
-          <span class="tooltip">Home</span>
-        </li>
-        <li>
-          <a href="/games">
-            <i class="bx bxs-game"></i>
-            <span class="links_name">Games</span>
-          </a>
-          <span class="tooltip">Games</span>
-        </li>
-        <li>
-          <a href="/leaderboard">
-            <i class="bx bx-list-ul"></i>
-            <span class="links_name">Leaderboard</span>
-          </a>
-          <span class="tooltip">Leaderboard</span>
-        </li>
-        <li>
-          <a href="/about">
-            <i class="bx bx-question-mark"></i>
-            <span class="links_name">About</span>
-          </a>
-          <span class="tooltip">About</span>
-        </li>
-      </ul>
-      <div class="profile_content">
-        <div class="profile">
-          <div class="profile_details">
-            <img src="/img/profileImages/profileImage.jpg" alt="" />
-            <div class="name_job">
-              <div class="name">USERNAME</div>
-              <div class="job">--------</div>
-            </div>
+    <div>
+
+      <div class="sidebar">
+        <div class="logo_content">
+          <div class="logo">
+            <i class="bx bxl-codepen"></i>
+            <div class="logo_name">CodingLab</div>
           </div>
-          <i class="bx bx-log-out" id="log_out"></i>
+          <i class="bx bx-menu" id="btn"></i>
+        </div>
+        <ul class="nav_list">
+          <li>
+            <a href="#">
+              <i class="bx bx-search"></i>
+              <input type="text" placeholder="Search..." />
+            </a>
+            <span class="tooltip">Search</span>
+          </li>
+          <li>
+            <a href="/">
+              <i class="bx bx-home"></i>
+              <span class="links_name">Home</span>
+            </a>
+            <span class="tooltip">Home</span>
+          </li>
+          <li>
+            <a href="/games">
+              <i class="bx bxs-game"></i>
+              <span class="links_name">Games</span>
+            </a>
+            <span class="tooltip">Games</span>
+          </li>
+          <li>
+            <a href="/leaderboard">
+              <i class="bx bx-list-ul"></i>
+              <span class="links_name">Leaderboard</span>
+            </a>
+            <span class="tooltip">Leaderboard</span>
+          </li>
+          <li>
+            <a href="/about">
+              <i class="bx bx-question-mark"></i>
+              <span class="links_name">About</span>
+            </a>
+            <span class="tooltip">About</span>
+          </li>
+        </ul>
+        <div class="profile_content">
+          <div class="profile">
+            <div class="profile_details">
+              <img src="/img/profileImages/profileImage.jpg" alt="" />
+              <div class="name_job">
+                <div class="name">USERNAME</div>
+                <div class="job">--------</div>
+              </div>
+            </div>
+            <i class="bx bx-log-out" id="log_out"></i>
+          </div>
         </div>
       </div>
+      <div class="home_content">
+        <div class="text">Home Content</div>
+      </div>
     </div>
-    <div class="home_content">
-      <div class="text">Home Content</div>
-    </div>
+
   </body>
+
 </html>
