@@ -1,0 +1,34 @@
+html {
+    font-size: 62.5%;
+}
+
+
+:root {
+    --bg-color-1: #1c1d21;
+    --bg-color-2: #6e8898;
+    --text-color-1: #fff;
+    --text-color-2: #b5b5b5;
+
+    --bar-width: 60px;
+    --bar-height: 8px;
+    --hamburger-gap: 6px;
+    --hamburger-foreground: #333;
+    --hamburger-background: white;
+    
+    --hamburger-margin: 8px;
+    --animation-timing: 200ms ease-in-out;
+
+
+    --hamburger-height: calc(var(--bar-height)* 3 + var(--hamburger-gap) * 2);
+    
+}
+
+body{
+    margin: 0;
+    padding: 0;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
