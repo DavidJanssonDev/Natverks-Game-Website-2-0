@@ -1,11 +1,15 @@
+// ---------------------------------------------------------------------
+// SERVER SET UPP
+
 const express = require("express");
 const mysql = require("mysql2/promise");
 const Handelbars = require("express-handlebars");
+const { createConectionDB } = require("./database/helpingDatabaseFunctions");
 
 const {
   switch: handelbars_switch,
   case: handelbars_case,
-} = require("./helpers/swistch_case");
+} = require("./helpers/swistchCase");
 const { extension } = require("mime");
 
 const app = express();
@@ -26,16 +30,21 @@ app.set("views", "./views");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
+// ---------------------------------------------------------------------
+// VARIABLES
+
+const USER_IS_LOGED_IN = false;
+
 app.get("/", async function (_req, res) {
   res.render("home", {
     title: "Game Home Page",
-    containFooter: true,
-    css: "css",
-    loggedIn: true,
+    username: "John Doe",
+    isLoggedIn: USER_IS_LOGED_IN,
   });
 });
 
 app.get("/game", async function (_req, res) {
+  if (!USER_IS_LOGED_IN) res.redirect("/");
   res.render("game", {
     title: "Game Page",
     containFooter: false,
@@ -44,6 +53,7 @@ app.get("/game", async function (_req, res) {
 });
 
 app.get("/about", async function (_req, res) {
+  if (!USER_IS_LOGED_IN) res.redirect("/");
   res.render("about", {
     title: "About Page",
     containFooter: true,
@@ -54,9 +64,16 @@ app.get("/about", async function (_req, res) {
 app.get("/login", async function (_req, res) {
   res.render("login", {
     title: "Login Page",
-    containFooter: true,
-    css: "login",
   });
+});
+
+app.post("/login", async function (_req, res) {
+  const connection = await createConectionDB();
+  const { username, password } = _req.body;
+
+  if (await isUserInDB(connection, username)) {
+    
+
 });
 
 app.get("/logout", async function (_req, res) {

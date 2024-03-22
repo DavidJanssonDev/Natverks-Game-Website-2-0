@@ -1,0 +1,32 @@
+<style>
+
+</style>
+
+<div class="cards">
+  {{#if isLoggedIn}}
+
+    <a href="/game" class="card">
+      <img src="https://via.placeholder.com/150" alt="Game Card" />
+      <h2>Game</h2>
+    </a>
+
+    <a href="/leaderboard" class="card">
+      <img src="https://via.placeholder.com/150" alt="Leaderboard Card" />
+      <h2>Leaderboard</h2>
+    </a>
+
+  {{else}}
+
+    <a href="/signup" class="card">
+      <img src="https://via.placeholder.com/150" alt="Sign Up Card" />
+      <h2>Sign Up</h2>
+    </a>
+
+    <a href="/login" class="card">
+      <img src="https://via.placeholder.com/150" alt="Log In Card" />
+      <h2>Log In</h2>
+    </a>
+
+  {{/if}}
+
+</div>
