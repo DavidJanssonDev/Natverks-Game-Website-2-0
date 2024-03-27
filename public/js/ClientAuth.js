@@ -1,6 +1,7 @@
 const subBnt = document.getElementById("submitButton");
 
 subBnt.addEventListener("click", async (event) => {
+  console.log("SERVER GETTING THE DATA");
   event.preventDefault();
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
@@ -15,5 +16,3 @@ subBnt.addEventListener("click", async (event) => {
   const data = await server_response.json();
   console.log(data);
 });
-
-console.log(`Log in Button: ${subBnt} `);

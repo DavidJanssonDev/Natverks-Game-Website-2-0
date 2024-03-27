@@ -88,11 +88,53 @@ app.post("/login", async function (_req, res) {
   const connection = await createConectionDB();
   const { username, password } = _req.body;
 
-  if ((await isUserInDB(connection, username)) && bcrypt.compare) {
-    //om inloggning ok
+  if (!username || !password) {
+    res.status(401).json({
+      login: false,
+      status: 401,
+      message: "Inloggning FAIL",
+    });
+    return;
+  }
+
+  const user = await getUserFromDB(connection, username);
+
+  if (!user) {
+    res.status(400).json({
+      login: false,
+      status: 400,
+      message: "Inloggning FAIL - User not found",
+    });
+    return;
+  }
+
+  const hashedPassword = user.password;
+
+  if (!(await bcrypt.compare(password, hashedPassword))) {
+    res.status(400).json({
+      login: false,
+      status: 400,
+      message: "Inloggning FAIL - Wrong password",
+    });
+    return;
+  }
+
+  if (user && (await bcrypt.compare(password, hashedPassword))) {
     _req.session.username = username;
     _req.session.isLoggedIn = true;
+
+    res.json({
+      login: true,
+      status: 200,
+      message: "Inloggning seccesful",
+    });
+    return;
   }
+  res.status(400).json({
+    login: false,
+    status: 400,
+    message: "Inloggning FAIL",
+  });
 });
 
 app.get("/logout", async function (_req, res) {
