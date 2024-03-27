@@ -11,7 +11,19 @@
     <link rel="stylesheet" href="/css/menuStyle.css" />
     <link rel="stylesheet" href="/css/main.css" />
 
+    {{#switch page}}
+      {{#case "login"}}
+        <script src="/js/ClientAuth.js" defer></script>
+      {{/case}}
+
+      {{#case "signup"}}
+        <script src="/js/ClientSignUp.js" defer></script>
+      {{/case}}
+
+    {{/switch}}
+
     <script src="/js/SideNavigationScript.js" defer></script>
+
     <title>{{title}}</title>
   </head>
   <body>

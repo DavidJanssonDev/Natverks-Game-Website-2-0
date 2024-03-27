@@ -1,17 +1,19 @@
 const subBnt = document.getElementById("submitButton");
 
-subBnt.addEventListener("click", (e) => {
-  e.preventDefault();
-
+subBnt.addEventListener("click", async (event) => {
+  event.preventDefault();
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  fetch("/loginScripts/athucation.js", {
+  const server_response = await fetch("/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, password }),
   });
-  location.assign();
+  const data = await server_response.json();
+  console.log(data);
 });
+
+console.log(`Log in Button: ${subBnt} `);

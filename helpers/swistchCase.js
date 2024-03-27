@@ -10,6 +10,6 @@ function handelbars_case_function(value, options) {
 }
 
 module.exports = {
-  switch: handelbars_switch_function,
-  case: handelbars_case_function,
+  handelbars_switch_function,
+  handelbars_case_function,
 };

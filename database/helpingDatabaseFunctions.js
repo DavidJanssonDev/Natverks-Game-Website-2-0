@@ -1,7 +1,9 @@
 const mysql = require("mysql2/promise");
 
 async function createConectionDB() {
-  return await mysql.createConnection(process.env.DB_CONECTION_DATA);
+  return await mysql.createConnection(
+    JSON.parse(process.env.DB_CONECTION_DATA)
+  );
 }
 
 async function isUserInDB(connection, username) {
