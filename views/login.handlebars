@@ -1,14 +1,36 @@
-<div>
-  <form>
+<div class="login-container">
+  <form id="login-form">
 
-    <label for="username">Username</label>
+    <div class="input-container">
+      <label for="username" class="form-label">Username</label>
 
-    <input type="text" name="username" id="username" />
+      <input
+        type="text"
+        name="username"
+        id="username-feild"
+        class="input-field"
+        placeholder="Username ..."
+        autocomplete="username"
+        maxlength="25"
+        required
+      />
+    </div>
 
-    <label for="password">Password</label>
+    <div class="input-container">
+      <label for="password">Password</label>
 
-    <input type="password" name="password" id="password" />
+      <input
+        type="text"
+        name="password"
+        id="password-feild"
+        class="input-field"
+        placeholder="Password ..."
+        autocomplete="current-password"
+        maxlength="50"
+        required
+      />
+    </div>
 
-    <button type="submit" id="submitButton">Log In</button>
+    <button type="submit" id="submit-button">Log In</button>
   </form>
 </div>

@@ -2,22 +2,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Boxicons CSS -->
+    {{! GOOGLE ICONS  }}
     <link
-      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp|Material+Symbols+Outlined|Material+Symbols+Rounded|Material+Symbols+Sharp|Material+Symbols+Two+Tone"
       rel="stylesheet"
     />
+
     <link rel="stylesheet" href="/css/colorsStyles.css" />
     <link rel="stylesheet" href="/css/menuStyle.css" />
-    <link rel="stylesheet" href="/css/main.css" />
 
     {{#switch page}}
       {{#case "login"}}
-        <script src="/js/ClientAuth.js" defer></script>
+        <script
+          src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"
+        ></script>
+        <script src="/js/loginAndSignin/ClientAuth.js" defer></script>
+        <link rel="stylesheet" href="/css/login.css" />
       {{/case}}
 
       {{#case "signup"}}
-        <script src="/js/ClientSignUp.js" defer></script>
+        <script
+          src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"
+        ></script>
+        <script src="/js/loginAndSignin/ClientSignup.js" defer></script>
+        <link rel="stylesheet" href="/css/login.css" />
+      {{/case}}
+
+      {{#case "game"}}
+        <script src="/js/game/drawingFunctions.js" type="module" defer></script>
+        <script src="/js/game/gameClassObjects.js" type="module" defer></script>
+        <script src="/js/game/userController.js" type="module" defer></script>
+        <script src="/js/game/mainGameScript.js" type="module" defer></script>
+        <link rel="stylesheet" href="/css/game.css" />
+      {{/case}}
+
+      {{#case "home"}}
+        <link rel="stylesheet" href="/css/card.css" />
+        <link rel="stylesheet" href="/css/icon.css" />
       {{/case}}
 
     {{/switch}}
@@ -31,54 +52,66 @@
     <div class="sidebar">
       <div class="logo_content">
         <div class="logo">
+          <i class="material-symbols-outlined">
+            deployed_code
+          </i>
           <i class="bx bxl-codepen"></i>
           <div class="logo_name">CodingLab</div>
         </div>
-        <i class="bx bx-menu" id="btn"></i>
+        <i class="material-symbols-outlined" id="btn">menu</i>
       </div>
       <ul class="nav_list">
         <li>
-          <a href="#">
-            <i class="bx bx-search"></i>
-            <input type="text" placeholder="Search..." />
+          <a href="">
+            <i class="material-symbols-outlined bx-search">search</i>
+            <input type="text" placeholder="  Search..." />
           </a>
           <span class="tooltip">Search</span>
         </li>
         <li>
           <a href="/">
-            <i class="bx bx-home"></i>
+            <i class="material-symbols-outlined">home</i>
             <span class="links_name">Home</span>
           </a>
           <span class="tooltip">Home</span>
         </li>
-        <li>
-          <a href="/games">
-            <i class="bx bxs-game"></i>
-            <span class="links_name">Games</span>
-          </a>
-          <span class="tooltip">Games</span>
-        </li>
-        <li>
-          <a href="/leaderboard">
-            <i class="bx bx-list-ul"></i>
-            <span class="links_name">Leaderboard</span>
-          </a>
-          <span class="tooltip">Leaderboard</span>
-        </li>
-        <li>
-          <a href="/about">
-            <i class="bx bx-question-mark"></i>
-            <span class="links_name">About</span>
-          </a>
-          <span class="tooltip">About</span>
-        </li>
+        {{#if isLoggedIn}}
+          <li>
+            <a href="/game">
+              <i class="material-symbols-outlined">videogame_asset</i>
+              <span class="links_name">Games</span>
+            </a>
+            <span class="tooltip">Games</span>
+          </li>
+          <li>
+            <a href="/leaderboard">
+              <i class="material-symbols-outlined">leaderboard</i>
+              <span class="links_name">Leaderboard</span>
+            </a>
+            <span class="tooltip">Leaderboard</span>
+          </li>
+          <li>
+            <a href="/about">
+              <i class="material-symbols-outlined">help_outline</i>
+              <span class="links_name">About</span>
+            </a>
+            <span class="tooltip">About</span>
+          </li>
+          <li>
+            <a href="/settings">
+              <i class="material-symbols-outlined">settings</i>
+              <span class="links_name">Settings</span>
+            </a>
+            <span class="tooltip">Settings</span>
+          </li>
+        {{/if}}
       </ul>
       <div class="profile_content">
         <div class="profile">
           <div class="profile_details">
             <img src="/img/profileImages/profileImage.jpg" alt="" />
             <div class="name_job">
-              {{#if logIn}}
+              {{#if isLoggedIn}}
                 <div class="name">{{username}}</div>
                 <div class="job">--------</div>
               {{else}}
@@ -87,20 +120,26 @@
               {{/if}}
             </div>
           </div>
-          {{#if logIn}}
+          {{#if isLoggedIn}}
             <a href="/logout">
-              <i class="bx bx-log-out" id="log_out"></i>
+              <i
+                class="material-symbols-outlined"
+                id="log_out_and_login_buton"
+              >logout</i>
             </a>
           {{else}}
             <a href="/login">
-              <i class="bx bx-log-in" id="log_out"></i>
+              <i
+                class="material-symbols-outlined"
+                id="log_out_and_login_buton"
+              >login</i>
             </a>
           {{/if}}
         </div>
       </div>
     </div>
 
-    <div class="home_content">
+    <div class="home-content">
       {{{body}}}
     </div>
 

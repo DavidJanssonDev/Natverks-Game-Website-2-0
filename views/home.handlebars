@@ -1,32 +1,38 @@
-<style>
+<div class="card-container">
 
-</style>
-
-<div class="cards">
   {{#if isLoggedIn}}
-
     <a href="/game" class="card">
-      <img src="https://via.placeholder.com/150" alt="Game Card" />
-      <h2>Game</h2>
+      <div class="card-link-icon">
+        <i class="material-symbols-outlined icon-card-size">gamepad</i>
+      </div>
+      <div class="card-link-titel">
+        <p>Spela</p>
+      </div>
     </a>
-
-    <a href="/leaderboard" class="card">
-      <img src="https://via.placeholder.com/150" alt="Leaderboard Card" />
-      <h2>Leaderboard</h2>
+    <a href="/about" class="card">
+      <div class="card-link-icon">
+        <i class="material-symbols-outlined icon-card-size">info</i>
+      </div>
+      <div class="card-link-titel">
+        <p>Om</p>
+      </div>
     </a>
-
   {{else}}
-
-    <a href="/signup" class="card">
-      <img src="https://via.placeholder.com/150" alt="Sign Up Card" />
-      <h2>Sign Up</h2>
-    </a>
-
     <a href="/login" class="card">
-      <img src="https://via.placeholder.com/150" alt="Log In Card" />
-      <h2>Log In</h2>
+      <div class="card-link-icon">
+        <i class="material-symbols-outlined icon-card-size">login</i>
+      </div>
+      <div class="card-link-titel">
+        <p>Log In</p>
+      </div>
     </a>
-
+    <a href="/signup" class="card">
+      <div class="card-link-icon">
+        <i class="material-symbols-outlined icon-card-size">add</i>
+      </div>
+      <div class="card-link-titel">
+        <p>Sign up</p>
+      </div>
+    </a>
   {{/if}}
-
 </div>
