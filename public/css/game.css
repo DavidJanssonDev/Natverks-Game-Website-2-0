@@ -23,8 +23,9 @@
     position: relative;
 }
 
-#game-element {
+#canvas {
     height: 100%;
     width: 100%;
     border: solid 0.5em black;
+    image-rendering: pixelated;
 }

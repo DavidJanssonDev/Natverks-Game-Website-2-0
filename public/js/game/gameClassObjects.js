@@ -1,59 +1,86 @@
 export class Player {
   constructor(playerData) {
-    this.x = playerData.startXPos;
-    this.y = playerData.startYPos;
-
-    this.playerSize = {
-      width: playerData.width,
-      height: playerData.height,
+    this.statsData = {
+      health: playerData.Health,
+      damage: playerData.Damage,
+      speed: playerData.Speed,
+      size: {
+        width: playerData.width,
+        height: playerData.height,
+      },
+      characterColor: playerData.characterColor,
     };
 
-    this.xSpeed = playerData.Speed;
-    this.ySpeed = playerData.Speed;
-    this.playerDirection = {
-      x: 0,
-      y: 0,
+    this.movementData = {
+      x: playerData.startXPos,
+      y: playerData.startYPos,
+      xSpeed: this.statsData.speed,
+      ySpeed: this.statsData.speed,
+      direction: {
+        x: 0,
+        y: 0,
+      },
     };
 
-    this.hp = playerData.Health;
-    this.damage = playerData.Damage;
+    this.bulletData = {
+      x: null,
+      y: null,
+      damage: this.statsData.damage,
+      speed: playerData.projectalSpeed,
+      size: {
+        width: playerData.projectalSize,
+        height: playerData.projectalSize,
+      },
+      direction: {
+        x: this.movementData.direction.x,
+        y: this.movementData.direction.y,
+      },
+      startPosOffset: 5,
+    };
+  }
 
-    this.projectalSpeed = playerData.projectalSpeed;
-    this.projectalSize = playerData.projectalSize;
-    this.bulletSpawnOffset = 5;
+  move() {
+    this.movementData.x +=
+      this.movementData.direction.x * this.movementData.xSpeed;
+    this.movementData.y +=
+      this.movementData.direction.y * this.movementData.ySpeed;
+  }
 
-    this.playerColor = playerData.playerColor;
+  update() {
+    console.log(this, "player update");
+    this.move();
   }
 
   draw(ctx) {
-    ctx.fillStyle = this.playerColor;
+    ctx.fillStyle = this.statsData.characterColor;
+    console.table({
+      x: this.movementData.x - this.statsData.size.width / 2,
+      y: this.movementData.y - this.statsData.size.height / 2,
+      width: this.statsData.size.width,
+      height: this.statsData.size.height,
+    });
+
     ctx.fillRect(
-      this.x - this.playerSize.width / 2,
-      this.y - this.playerSize.height / 2,
-      this.playerSize.width,
-      this.playerSize.height
+      this.movementData.x - this.statsData.size.width / 2,
+      this.movementData.y - this.statsData.size.height / 2,
+      this.statsData.size.width,
+      this.statsData.size.height
     );
   }
 
   shoot(GameObjectList) {
-    const bulletData = {
-      xDirection: this.playerDirection.x,
-      yDirection: this.playerDirection.y,
+    const bulletPositionData = {
       x:
-        this.x +
-        this.playerSize.width / 2 +
-        this.playerDirection.x * this.bulletSpawnOffset,
+        this.movementData.x +
+        this.movementData.direction.x *
+          (this.statsData.width / 2 + this.bulletData.startPosOffset),
       y:
-        this.y +
-        this.playerSize.height / 2 +
-        this.playerDirection.y * this.bulletSpawnOffset,
-      speed: this.projectalSpeed,
-      damage: this.damage,
-      size: this.projectalSize,
-      color: "black",
+        this.movementData.y +
+        this.movementData.direction.y *
+          (this.statsData.height / 2 + this.bulletData.startPosOffset),
     };
 
-    const bullet = new Bullet(bulletData);
+    const bullet = new Bullet({ ...this.bulletData, ...bulletPositionData });
     GameObjectList.addBulletObject(bullet);
   }
 }
@@ -80,8 +107,30 @@ class Bullet {
     this.bulletColor = bulletStats.color;
   }
 
-  update() {}
+  move() {
+    this.x += this.bulletDirection.xDirection * this.xSpeed;
+    this.y += this.bulletDirection.yDirection * this.ySpeed;
+  }
 
+  handleCollisionWithOtherObjects() {
+    const objectList = GameList.objectList();
+
+    for (const object of objectList) {
+      if (object instanceof Player) continue;
+      if (!Collistion.checkCollision(this, object)) continue;
+
+      if (!(object instanceof Monster && object in GameList.monsterObjectList))
+        continue;
+
+      object.statsData.health -= this.bulletDamage;
+      GameList.removeBulletObject(this);
+    }
+  }
+
+  update() {
+    this.move();
+    this.hit();
+  }
   draw(ctx) {
     ctx.fillStyle = this.bulletColor;
     ctx.fillRect(
@@ -99,15 +148,20 @@ export class GameList {
   static monsterObjectList = [];
   static bulletsObjectList = [];
 
-  static setPlayerObjectList(object) {
-    if (!(object instanceof Player)) return;
-    GameList.playerObjectList.push(object);
+  static addPlayerObject(...objects) {
+    for (const object of objects) {
+      if (!(object instanceof Player)) continue;
+      GameList.playerObjectList.push(object);
+    }
   }
   static addMonsterObject(object) {
     if (object instanceof Monster) return;
     GameList.monsterObjectList.push(object);
   }
 
+  static getPlayerObjectList() {
+    return GameList.playerObjectList.find((player) => player instanceof Player);
+  }
   static removeMonsterObject(object) {
     if (!(object instanceof Monster)) return;
     if (!(20 < GameList.monsterObjectList.Count > 0)) return;
@@ -125,7 +179,7 @@ export class GameList {
     GameList.bulletsObjectList.filter((bullet) => bullet !== object);
   }
 
-  static objectList() {
+  static combindAllListTooObjectList() {
     GameList.objectList = [].concat(
       GameList.playerObjectList,
       GameList.monsterObjectList,
@@ -133,8 +187,64 @@ export class GameList {
     );
   }
 
-  static get objectList() {
-    GameList.objectList();
+  static getObjectList() {
+    GameList.combindAllListTooObjectList();
     return GameList.objectList;
+  }
+}
+
+class Collistion {
+  static checkCollision(object1, object2) {
+    const area1 = {
+      x: object1.movementData.x - object1.statsData.size.width / 2,
+      y: object1.movementData.y - object1.statsData.size.height / 2,
+      width: object1.statsData.size.width,
+      height: object1.statsData.size.height,
+      rightEdge: object1.movementData.x + object1.statsData.size.width / 2,
+      bottomEdge: object1.movementData.y + object1.statsData.size.height / 2,
+    };
+    const area2 = {
+      x: object2.movementData.x - object2.statsData.size.width / 2,
+      y: object2.movementData.y - object2.statsData.size.height / 2,
+      width: object2.statsData.size.width,
+      height: object2.statsData.size.height,
+      rightEdge: object2.movementData.x + object2.statsData.size.width / 2,
+      bottomEdge: object2.movementData.y + object2.statsData.size.height / 2,
+    };
+
+    return (
+      area1.rightEdge > area2.x &&
+      area1.x < area2.rightEdge &&
+      area1.bottomEdge > area2.y &&
+      area1.y < area2.bottomEdge
+    );
+  }
+}
+
+export class DrawingClass {
+  static drawingTool = null;
+
+  static draw(object) {
+    if (this.drawingTool === null)
+      return console.error("Drawing tool to use is not defined");
+
+    if (
+      !(
+        object instanceof Player ||
+        object instanceof Monster ||
+        object instanceof Bullet
+      )
+    )
+      return console.error(
+        "Drawing tool can only draw Player, Monster or Bullet"
+      );
+
+    console.log("DRAWING");
+    object.draw(this.drawingTool);
+    console.log("DRAWING DONE");
+  }
+
+  static setDrawingTool(drawingTool) {
+    this.drawingTool = drawingTool;
   }
 }

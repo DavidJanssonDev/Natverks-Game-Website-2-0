@@ -1,55 +1,51 @@
-import { Player, GameList } from "./gameClassObjects.js";
+import { Player, GameList, DrawingClass } from "./gameClassObjects.js";
 import { resetDirection, updateDriection } from "./userController.js";
-
-const CANVAS_CONTEXT = document.getElementById("game-element").getContext("2D");
 
 //? PLayer UPDATE
 
 document.addEventListener("keydown", (event) =>
-  updateDriection(
-    event,
-    gameObjects.playerAndMonsters.find(
-      (object) => object.constructor.name === "Player"
-    )
-  )
+  updateDriection(event, GameList.getPlayerObjectList())
 );
 document.addEventListener("keyup", (event) =>
-  resetDirection(
-    event,
-    gameObjects.playerAndMonsters.find(
-      (object) => object.constructor.name === "Player"
-    )
-  )
+  resetDirection(event, GameList.getPlayerObjectList())
 );
 
 //* GAME UPDATE LOOP
 
 async function gameSetUp() {
-  const server_response = await fetch("/gameSetup", {
+  //* Setting up drawing tool
+
+  const canvas = document.getElementById("canvas");
+  const canvasDrawingTool = canvas.getContext("2d");
+
+  canvasDrawingTool.fillRect(190, 190, 100, 100);
+
+  DrawingClass.setDrawingTool(canvasDrawingTool);
+
+  //* Setting up player
+  const serverResponse = await fetch("/gameSetup", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({}),
   });
-  const data = JSON.parse(await server_response.json());
-
-  console.log(data);
+  const data = JSON.parse(await serverResponse.json());
 
   const player = new Player(data);
-  GameList.setPlayerObjectList(player);
+  GameList.addPlayerObject(player);
 
-  console.log(player);
+  DrawingClass.draw(player);
 
   // gameLoop();
 }
 
 function gameLoop() {
-  Object.values(gameObjects).forEach((object_list) => {
-    object_list.forEach((object) => {
-      object.update();
-      object.draw();
-    });
+  const ObjectList = GameList.getObjectList();
+
+  ObjectList.forEach((object) => {
+    object.update();
+    DrawingClass.draw(object);
   });
   requestAnimationFrame(gameLoop);
 }
