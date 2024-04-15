@@ -124,7 +124,7 @@ app.get("/login", async function (_req, res) {
 app.get("/backdoor", async function (_req, res) {
   _req.session.isLoggedIn = true;
   _req.session.username = "user_1";
-  res.redirect("/");
+  res.redirect("/game");
 });
 
 //~ Logout
@@ -249,7 +249,7 @@ app.post("/signup", async function (_req, res) {
 //* -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
 
 //~ GAME START UP
-app.post("/gameSetup", async function (_req, res) {
+app.post("/gameSetup", function (_req, res) {
   const environmentPlayerDeaultStats = process.env.PLAYER_DEAFULT_STATS;
   res.json(environmentPlayerDeaultStats);
 });

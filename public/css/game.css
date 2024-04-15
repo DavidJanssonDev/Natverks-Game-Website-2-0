@@ -1,4 +1,4 @@
-/* 
+
 #game-element {
     display: flex;
     flex-direction: column;
@@ -10,7 +10,7 @@
     overflow: hidden;
     position: relative;
 
-} */
+}
 .game-container {
     display: flex;
     flex-direction: column;

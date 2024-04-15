@@ -16,9 +16,11 @@ export class Player {
       y: playerData.startYPos,
       xSpeed: this.statsData.speed,
       ySpeed: this.statsData.speed,
-      direction: {
-        x: 0,
-        y: 0,
+      keys: {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
       },
     };
 
@@ -32,39 +34,43 @@ export class Player {
         height: playerData.projectalSize,
       },
       direction: {
-        x: this.movementData.direction.x,
-        y: this.movementData.direction.y,
+        x: null,
+        y: null,
       },
       startPosOffset: 5,
     };
   }
 
   move() {
-    this.movementData.x +=
-      this.movementData.direction.x * this.movementData.xSpeed;
-    this.movementData.y +=
-      this.movementData.direction.y * this.movementData.ySpeed;
+    let xDirection = this.movementData.keys.right - this.movementData.keys.left;
+    let yDirection = this.movementData.keys.down - this.movementData.keys.up;
+
+    this.movementData.x += xDirection * this.movementData.xSpeed;
+    this.movementData.y += yDirection * this.movementData.ySpeed;
   }
 
   update() {
-    console.log(this, "player update");
+    if (!Collistion.objectInCanvas(this)) return;
     this.move();
   }
 
   draw(ctx) {
-    ctx.fillStyle = this.statsData.characterColor;
-    console.table({
+    const drawingInfo = {
       x: this.movementData.x - this.statsData.size.width / 2,
       y: this.movementData.y - this.statsData.size.height / 2,
       width: this.statsData.size.width,
       height: this.statsData.size.height,
-    });
+    };
+
+    ctx.fillStyle = this.statsData.characterColor;
+
+    console.table(drawingInfo);
 
     ctx.fillRect(
-      this.movementData.x - this.statsData.size.width / 2,
-      this.movementData.y - this.statsData.size.height / 2,
-      this.statsData.size.width,
-      this.statsData.size.height
+      drawingInfo.x,
+      drawingInfo.y,
+      drawingInfo.width,
+      drawingInfo.height
     );
   }
 
@@ -194,6 +200,15 @@ export class GameList {
 }
 
 class Collistion {
+  static objectInCanvas(object) {
+    return (
+      object.movementData.x > 0 &&
+      object.movementData.y > 0 &&
+      object.movementData.x + object.statsData.size.width < canvas.width &&
+      object.movementData.y + object.statsData.size.height < canvas.height
+    );
+  }
+
   static checkCollision(object1, object2) {
     const area1 = {
       x: object1.movementData.x - object1.statsData.size.width / 2,
@@ -203,6 +218,7 @@ class Collistion {
       rightEdge: object1.movementData.x + object1.statsData.size.width / 2,
       bottomEdge: object1.movementData.y + object1.statsData.size.height / 2,
     };
+
     const area2 = {
       x: object2.movementData.x - object2.statsData.size.width / 2,
       y: object2.movementData.y - object2.statsData.size.height / 2,
@@ -239,9 +255,11 @@ export class DrawingClass {
         "Drawing tool can only draw Player, Monster or Bullet"
       );
 
-    console.log("DRAWING");
     object.draw(this.drawingTool);
-    console.log("DRAWING DONE");
+  }
+
+  static clearCanvas() {
+    this.drawingTool.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   static setDrawingTool(drawingTool) {

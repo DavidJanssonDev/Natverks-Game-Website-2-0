@@ -1,37 +1,68 @@
-export function updateDriection(event, Player) {
+export function updateDriection(event, player) {
   switch (event.key) {
-    case "ArrowLeft" | "a":
-      Player.playerDirection.x = -1;
-      Player.playerDirection.y = 0;
+    case "a":
+      player.movementData.keys.left = true;
       break;
-    case "ArrowRight" | "d":
-      Player.playerDirection.x = 1;
-      Player.playerDirection.y = 0;
+
+    case "d":
+      player.movementData.keys.right = true;
       break;
-    case "ArrowUp" | "w":
-      Player.playerDirection.x = 0;
-      Player.playerDirection.y = -1;
+
+    case "w":
+      player.movementData.keys.up = true;
       break;
-    case "ArrowDown" | "s":
-      Player.playerDirection.x = 0;
-      Player.playerDirection.y = 1;
+
+    case "s":
+      player.movementData.keys.down = true;
+      break;
+
+    case "ArrowLeft":
+      player.movementData.keys.left = true;
+      break;
+
+    case "ArrowRight":
+      player.movementData.keys.right = true;
+      break;
+
+    case "ArrowUp":
+      player.movementData.keys.up = true;
+      break;
+
+    case "ArrowDown":
+      player.movementData.keys.down = true;
       break;
   }
 }
 
-export function resetDirection(event, Player) {
+export function resetDirection(event, player) {
   switch (event.key) {
-    case "ArrowLeft" | "a":
-      Player.playerDirection.x = 0;
+    case "a":
+      player.movementData.keys.left = false;
       break;
-    case "ArrowRight" | "d":
-      Player.playerDirection.x = 0;
+
+    case "d":
+      player.movementData.keys.right = false;
       break;
-    case "ArrowUp" | "w":
-      Player.playerDirection.y = 0;
+
+    case "w":
+      player.movementData.keys.up = false;
       break;
-    case "ArrowDown" | "s":
-      Player.playerDirection.y = 0;
+
+    case "s":
+      player.movementData.keys.down = false;
+      break;
+
+    case "ArrowLeft":
+      player.movementData.keys.left = false;
+      break;
+    case "ArrowRight":
+      player.movementData.keys.right = true;
+      break;
+    case "ArrowUp":
+      player.movementData.keys.up = true;
+      break;
+    case "ArrowDown":
+      player.movementData.keys.down = true;
       break;
   }
 }

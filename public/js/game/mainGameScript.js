@@ -18,8 +18,6 @@ async function gameSetUp() {
   const canvas = document.getElementById("canvas");
   const canvasDrawingTool = canvas.getContext("2d");
 
-  canvasDrawingTool.fillRect(190, 190, 100, 100);
-
   DrawingClass.setDrawingTool(canvasDrawingTool);
 
   //* Setting up player
@@ -30,26 +28,32 @@ async function gameSetUp() {
     },
     body: JSON.stringify({}),
   });
-  const data = JSON.parse(await serverResponse.json());
 
-  const player = new Player(data);
+  const data = await serverResponse.json();
+  const json_data = JSON.parse(data);
+
+  console.table(json_data);
+  const player = new Player(json_data);
+
   GameList.addPlayerObject(player);
 
-  DrawingClass.draw(player);
-
-  // gameLoop();
+  gameLoop();
 }
 
 function gameLoop() {
+  // GET A LIST WITH ALL THE OBJECTS
   const ObjectList = GameList.getObjectList();
 
+  // CLEAR THE CANVAS
+  DrawingClass.clearCanvas();
+
+  //* Rendering of the objects and updateing of the objects
   ObjectList.forEach((object) => {
     object.update();
     DrawingClass.draw(object);
   });
+
   requestAnimationFrame(gameLoop);
 }
-
-// gameLoop();
 
 gameSetUp();
