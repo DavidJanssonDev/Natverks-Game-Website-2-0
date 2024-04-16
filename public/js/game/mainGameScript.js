@@ -16,9 +16,9 @@ async function gameSetUp() {
   //* Setting up drawing tool
 
   const canvas = document.getElementById("canvas");
-  const canvasDrawingTool = canvas.getContext("2d");
 
-  DrawingClass.setDrawingTool(canvasDrawingTool);
+  DrawingClass.setCanvas(canvas);
+  DrawingClass.setDrawingTool();
 
   //* Setting up player
   const serverResponse = await fetch("/gameSetup", {

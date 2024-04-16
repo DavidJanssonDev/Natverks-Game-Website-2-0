@@ -45,21 +45,106 @@ export class Player {
     let xDirection = this.movementData.keys.right - this.movementData.keys.left;
     let yDirection = this.movementData.keys.down - this.movementData.keys.up;
 
-    this.movementData.x += xDirection * this.movementData.xSpeed;
-    this.movementData.y += yDirection * this.movementData.ySpeed;
+    let momentSpeedX = xDirection * this.movementData.xSpeed;
+    let momentSpeedY = yDirection * this.movementData.ySpeed;
+
+    // Stop the player from going off the screen on the x - axis
+    if (this.movementData.x <= 0 && this.movementData.keys.left) {
+      momentSpeedX = 0;
+    }
+
+    // Stop the player from going off the screen on the x + axis
+    if (
+      this.movementData.x + this.statsData.size.width >=
+        DrawingClass.canvas.width &&
+      this.movementData.keys.right
+    ) {
+      momentSpeedX = 0;
+    }
+
+    // Stop the player from going off the screen on the y - axis
+    if (this.movementData.y <= 0 && this.movementData.keys.up) {
+      momentSpeedY = 0;
+    }
+
+    // Stop the player from going off the screen on the y + axis
+
+    if (
+      this.movementData.y + this.statsData.size.height >=
+        DrawingClass.canvas.height &&
+      this.movementData.keys.down
+    ) {
+      momentSpeedY = 0;
+    }
+
+    if (Math.abs(xDirection) && Math.abs(yDirection)) {
+      momentSpeedX = (xDirection * this.movementData.xSpeed) / 1.414;
+      momentSpeedY = (yDirection * this.movementData.ySpeed) / 1.414;
+    }
+
+    this.movementData.x += momentSpeedX;
+    this.movementData.y += momentSpeedY;
   }
 
   update() {
-    if (!Collistion.objectInCanvas(this)) return;
+    // let [touchingXBorder, touchingYBorder] = Collistion.objectInCanvas(this);
+
+    this.movementData.keys.right -
+      this.movementData.keys.left * this.movementData.xSpeed;
+
+    // Om spelaren är i väggen och håller i väggens rikings key = 0 speed
+    // Om spelaren är i väggen och håller inte i väggens riktins key = speed
+    //
+    //
+
+    // this.movementData.ySpeed = !touchingYBorder * this.statsData.speed;
+
     this.move();
   }
 
+  /*
+
+
+  (CanvasXEnd om den rör Spelare && SpelareInputVänster) 
+  (CanvasXStart om den rör Spelare  SpelareInputHöger) 
+  (CanvasYStart om den rör Spelare && SpelareInputBak) 
+  (CanvasXEnd om den rör Spelare && SpelareInputUp)
+
+
+  dirY = this.movementData.keys.down - this.movementData.keys.up
+  dirX = this.movementData.keys.right - this.movementData.keys.left
+  this.movementData.xSpeed = (
+    *   (this.movementData.x - this.statsData.size.width / 2 < 0 )
+        || 
+    *   (this.movementData.x + this.statsData.size.width / 2 > canvas.width)
+    ) * this.statsData.speed
+  this.movementData.ySpeed = !sideY * this.statsData.speed
+
+
+        |
+  - / - |   +/-
+        |
+        |
+--------|--------
+        |
+        |
+  -/+- -|  +\+
+        |
+        |
+
+
+  XDir = this.movementData.keys.right - this.movementData.keys.left | 1 - 0 - -1
+  YDir = this.movementData.keys.down - this.movementData.keys.up    | 1 - 0 - -1
+  
+  */
   draw(ctx) {
     const drawingInfo = {
-      x: this.movementData.x - this.statsData.size.width / 2,
-      y: this.movementData.y - this.statsData.size.height / 2,
+      x: this.movementData.x,
+      y: this.movementData.y,
       width: this.statsData.size.width,
       height: this.statsData.size.height,
+      direction_x: this.movementData.keys.right - this.movementData.keys.left,
+      direction_y: this.movementData.keys.down - this.movementData.keys.up,
     };
 
     ctx.fillStyle = this.statsData.characterColor;
@@ -201,15 +286,11 @@ export class GameList {
 
 class Collistion {
   static objectInCanvas(object) {
-    return (
-      object.movementData.x > 0 &&
-      object.movementData.y > 0 &&
-      object.movementData.x + object.statsData.size.width < canvas.width &&
-      object.movementData.y + object.statsData.size.height < canvas.height
-    );
+    if (object.movementData) {
+    }
   }
 
-  static checkCollision(object1, object2) {
+  static checkCollisionBetweenObjects(object1, object2) {
     const area1 = {
       x: object1.movementData.x - object1.statsData.size.width / 2,
       y: object1.movementData.y - object1.statsData.size.height / 2,
@@ -239,6 +320,7 @@ class Collistion {
 
 export class DrawingClass {
   static drawingTool = null;
+  static canvas = null;
 
   static draw(object) {
     if (this.drawingTool === null)
@@ -262,7 +344,11 @@ export class DrawingClass {
     this.drawingTool.clearRect(0, 0, canvas.width, canvas.height);
   }
 
-  static setDrawingTool(drawingTool) {
-    this.drawingTool = drawingTool;
+  static setCanvas(canvas) {
+    this.canvas = canvas;
+  }
+
+  static setDrawingTool() {
+    this.drawingTool = this.canvas.getContext("2d");
   }
 }
