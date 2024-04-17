@@ -42,101 +42,28 @@ export class Player {
   }
 
   move() {
-    let xDirection = this.movementData.keys.right - this.movementData.keys.left;
-    let yDirection = this.movementData.keys.down - this.movementData.keys.up;
+    Collistion.objectIsInCanvas(this, DrawingClass.canvas);
 
-    let momentSpeedX = xDirection * this.movementData.xSpeed;
-    let momentSpeedY = yDirection * this.movementData.ySpeed;
+    let dirXAxis = this.movementData.keys.right - this.movementData.keys.left;
+    let dirYAxis = this.movementData.keys.down - this.movementData.keys.up;
 
-    // Stop the player from going off the screen on the x - axis
-    if (this.movementData.x <= 0 && this.movementData.keys.left) {
-      momentSpeedX = 0;
-    }
+    this.movementData.x += dirXAxis * this.movementData.xSpeed;
+    this.movementData.y += dirYAxis * this.movementData.ySpeed;
 
-    // Stop the player from going off the screen on the x + axis
-    if (
-      this.movementData.x + this.statsData.size.width >=
-        DrawingClass.canvas.width &&
-      this.movementData.keys.right
-    ) {
-      momentSpeedX = 0;
-    }
+    //   let xDirection = this.movementData.keys.right - this.movementData.keys.left;
+    //   let yDirection = this.movementData.keys.down - this.movementData.keys.up;
 
-    // Stop the player from going off the screen on the y - axis
-    if (this.movementData.y <= 0 && this.movementData.keys.up) {
-      momentSpeedY = 0;
-    }
+    //   let momentSpeedX = xDirection * this.movementData.xSpeed;
+    //   let momentSpeedY = yDirection * this.movementData.ySpeed;
 
-    // Stop the player from going off the screen on the y + axis
-
-    if (
-      this.movementData.y + this.statsData.size.height >=
-        DrawingClass.canvas.height &&
-      this.movementData.keys.down
-    ) {
-      momentSpeedY = 0;
-    }
-
-    if (Math.abs(xDirection) && Math.abs(yDirection)) {
-      momentSpeedX = (xDirection * this.movementData.xSpeed) / 1.414;
-      momentSpeedY = (yDirection * this.movementData.ySpeed) / 1.414;
-    }
-
-    this.movementData.x += momentSpeedX;
-    this.movementData.y += momentSpeedY;
+    //   this.movementData.x += momentSpeedX;
+    //   this.movementData.y += momentSpeedY;
   }
 
   update() {
-    // let [touchingXBorder, touchingYBorder] = Collistion.objectInCanvas(this);
-
-    this.movementData.keys.right -
-      this.movementData.keys.left * this.movementData.xSpeed;
-
-    // Om spelaren är i väggen och håller i väggens rikings key = 0 speed
-    // Om spelaren är i väggen och håller inte i väggens riktins key = speed
-    //
-    //
-
-    // this.movementData.ySpeed = !touchingYBorder * this.statsData.speed;
-
     this.move();
   }
 
-  /*
-
-
-  (CanvasXEnd om den rör Spelare && SpelareInputVänster) 
-  (CanvasXStart om den rör Spelare  SpelareInputHöger) 
-  (CanvasYStart om den rör Spelare && SpelareInputBak) 
-  (CanvasXEnd om den rör Spelare && SpelareInputUp)
-
-
-  dirY = this.movementData.keys.down - this.movementData.keys.up
-  dirX = this.movementData.keys.right - this.movementData.keys.left
-  this.movementData.xSpeed = (
-    *   (this.movementData.x - this.statsData.size.width / 2 < 0 )
-        || 
-    *   (this.movementData.x + this.statsData.size.width / 2 > canvas.width)
-    ) * this.statsData.speed
-  this.movementData.ySpeed = !sideY * this.statsData.speed
-
-
-        |
-  - / - |   +/-
-        |
-        |
---------|--------
-        |
-        |
-  -/+- -|  +\+
-        |
-        |
-
-
-  XDir = this.movementData.keys.right - this.movementData.keys.left | 1 - 0 - -1
-  YDir = this.movementData.keys.down - this.movementData.keys.up    | 1 - 0 - -1
-  
-  */
   draw(ctx) {
     const drawingInfo = {
       x: this.movementData.x,
@@ -149,7 +76,7 @@ export class Player {
 
     ctx.fillStyle = this.statsData.characterColor;
 
-    console.table(drawingInfo);
+    // console.table(drawingInfo);
 
     ctx.fillRect(
       drawingInfo.x,
@@ -284,40 +211,6 @@ export class GameList {
   }
 }
 
-class Collistion {
-  static objectInCanvas(object) {
-    if (object.movementData) {
-    }
-  }
-
-  static checkCollisionBetweenObjects(object1, object2) {
-    const area1 = {
-      x: object1.movementData.x - object1.statsData.size.width / 2,
-      y: object1.movementData.y - object1.statsData.size.height / 2,
-      width: object1.statsData.size.width,
-      height: object1.statsData.size.height,
-      rightEdge: object1.movementData.x + object1.statsData.size.width / 2,
-      bottomEdge: object1.movementData.y + object1.statsData.size.height / 2,
-    };
-
-    const area2 = {
-      x: object2.movementData.x - object2.statsData.size.width / 2,
-      y: object2.movementData.y - object2.statsData.size.height / 2,
-      width: object2.statsData.size.width,
-      height: object2.statsData.size.height,
-      rightEdge: object2.movementData.x + object2.statsData.size.width / 2,
-      bottomEdge: object2.movementData.y + object2.statsData.size.height / 2,
-    };
-
-    return (
-      area1.rightEdge > area2.x &&
-      area1.x < area2.rightEdge &&
-      area1.bottomEdge > area2.y &&
-      area1.y < area2.bottomEdge
-    );
-  }
-}
-
 export class DrawingClass {
   static drawingTool = null;
   static canvas = null;
@@ -350,5 +243,40 @@ export class DrawingClass {
 
   static setDrawingTool() {
     this.drawingTool = this.canvas.getContext("2d");
+  }
+}
+
+class Collistion {
+  static objectIsInCanvas(object, canvas) {
+    let isObjectInPosCanvasYAxis = object.movementData.y < 0;
+    let isObjectInNegCanvasYAxis =
+      object.movementData.y + object.statsData.height > canvas.height;
+
+    let isObjectInPosCanvasXAxis = object.movementData.x < 0;
+    let isObjectInNegCanvasXAxis =
+      object.movementData.x + object.statsData.width > canvas.width;
+
+    if (isObjectInPosCanvasYAxis) {
+      object.movementData.y = 0;
+    } else if (isObjectInNegCanvasYAxis) {
+      object.movementData.y = canvas.height - object.statsData.height;
+    } else if (isObjectInPosCanvasXAxis) {
+      object.movementData.x = 0;
+    } else if (isObjectInNegCanvasXAxis) {
+      object.movementData.x = canvas.width - object.statsData.width;
+    }
+    // else if (isObjectInNegCanvasXAxis && isObjectInNegCanvasYAxis) {
+    //   object.movementData.x = canvas.width - object.statsData.width;
+    //   object.movementData.y = canvas.height - object.statsData.height;
+    // } else if (isObjectInNegCanvasXAxis && isObjectInPosCanvasYAxis) {
+    //   object.movementData.x = canvas.width - object.statsData.width;
+    //   object.movementData.y = 0;
+    // } else if (isObjectInPosCanvasXAxis && isObjectInNegCanvasYAxis) {
+    //   object.movementData.x = 0;
+    //   object.movementData.y = canvas.height - object.statsData.height;
+    // } else if (isObjectInPosCanvasXAxis && isObjectInPosCanvasYAxis) {
+    //   object.movementData.x = 0;
+    //   object.movementData.y = 0;
+    // }
   }
 }
