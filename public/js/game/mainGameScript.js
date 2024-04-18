@@ -39,7 +39,6 @@ async function gameSetUp() {
 
   gameLoop();
 }
-
 function gameLoop() {
   // GET A LIST WITH ALL THE OBJECTS
   const ObjectList = GameList.getObjectList();

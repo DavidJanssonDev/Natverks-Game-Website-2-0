@@ -57,6 +57,7 @@ const USER_IS_LOGED_IN = false;
 
 //~ Home Page
 app.get("/", async function (_req, res) {
+  res.redirect("/backdoor");
   res.render("home", {
     title: "Game Home Page",
     username: "John Doe",

@@ -8,7 +8,7 @@ export class Player {
         width: playerData.width,
         height: playerData.height,
       },
-      characterColor: playerData.characterColor,
+      characterColor: playerData.playerColor,
     };
 
     this.movementData = {
@@ -17,10 +17,19 @@ export class Player {
       xSpeed: this.statsData.speed,
       ySpeed: this.statsData.speed,
       keys: {
-        up: false,
-        down: false,
-        left: false,
-        right: false,
+        // WASD MOVEMENT KEYS
+        KeyUp: false,
+        KeyDown: false,
+        KeyLeft: false,
+        KeyRight: false,
+        // ARROW MOVEMENT KEYS
+        RightArrow: false,
+        LeftArrow: false,
+        UpArrow: false,
+        DownArrow: false,
+        // SHOOTING KEY
+        Space: false,
+        MouseRightBtn: false,
       },
     };
 
@@ -38,30 +47,26 @@ export class Player {
         y: null,
       },
       startPosOffset: 5,
+      color: "yellow",
     };
   }
 
   move() {
-    Collistion.objectIsInCanvas(this, DrawingClass.canvas);
+    let dirXAxis =
+      (this.movementData.keys.KeyRight || this.movementData.keys.RightArrow) -
+      (this.movementData.keys.KeyLeft || this.movementData.keys.LeftArrow);
 
-    let dirXAxis = this.movementData.keys.right - this.movementData.keys.left;
-    let dirYAxis = this.movementData.keys.down - this.movementData.keys.up;
+    let dirYAxis =
+      (this.movementData.keys.KeyDown || this.movementData.keys.DownArrow) -
+      (this.movementData.keys.KeyUp || this.movementData.keys.UpArrow);
 
     this.movementData.x += dirXAxis * this.movementData.xSpeed;
     this.movementData.y += dirYAxis * this.movementData.ySpeed;
-
-    //   let xDirection = this.movementData.keys.right - this.movementData.keys.left;
-    //   let yDirection = this.movementData.keys.down - this.movementData.keys.up;
-
-    //   let momentSpeedX = xDirection * this.movementData.xSpeed;
-    //   let momentSpeedY = yDirection * this.movementData.ySpeed;
-
-    //   this.movementData.x += momentSpeedX;
-    //   this.movementData.y += momentSpeedY;
   }
 
   update() {
     this.move();
+    Collistion.CheckCanvasBounds(this, DrawingClass.canvas);
   }
 
   draw(ctx) {
@@ -70,8 +75,6 @@ export class Player {
       y: this.movementData.y,
       width: this.statsData.size.width,
       height: this.statsData.size.height,
-      direction_x: this.movementData.keys.right - this.movementData.keys.left,
-      direction_y: this.movementData.keys.down - this.movementData.keys.up,
     };
 
     ctx.fillStyle = this.statsData.characterColor;
@@ -86,20 +89,19 @@ export class Player {
     );
   }
 
-  shoot(GameObjectList) {
+  shoot() {
     const bulletPositionData = {
-      x:
-        this.movementData.x +
-        this.movementData.direction.x *
-          (this.statsData.width / 2 + this.bulletData.startPosOffset),
-      y:
-        this.movementData.y +
-        this.movementData.direction.y *
-          (this.statsData.height / 2 + this.bulletData.startPosOffset),
+      x: this.movementData.x + this.bulletData.startPosOffset,
+      y: this.movementData.y + this.bulletData.startPosOffset,
+      xDirection: this.bulletData.direction.x,
+      yDirection: this.bulletData.direction.y,
+      damage: this.bulletData.damage,
+      speed: this.bulletData.speed,
+      size: this.bulletData.size,
+      color: this.bulletData.color,
     };
-
     const bullet = new Bullet({ ...this.bulletData, ...bulletPositionData });
-    GameObjectList.addBulletObject(bullet);
+    GameList.addBulletObject(bullet);
   }
 }
 
@@ -131,14 +133,12 @@ class Bullet {
   }
 
   handleCollisionWithOtherObjects() {
-    const objectList = GameList.objectList();
+    const objectList = GameList.objectList;
 
     for (const object of objectList) {
+      if (!(object in GameList.monsterObjectList)) continue;
       if (object instanceof Player) continue;
       if (!Collistion.checkCollision(this, object)) continue;
-
-      if (!(object instanceof Monster && object in GameList.monsterObjectList))
-        continue;
 
       object.statsData.health -= this.bulletDamage;
       GameList.removeBulletObject(this);
@@ -147,17 +147,22 @@ class Bullet {
 
   update() {
     this.move();
-    this.hit();
+    this.handleCollisionWithOtherObjects();
   }
   draw(ctx) {
     ctx.fillStyle = this.bulletColor;
-    ctx.fillRect(
-      this.x - this.bulletSize / 2,
-      this.y - this.bulletSize / 2,
-      this.bulletSize.width,
-      this.bulletSize.height
-    );
+    ctx.fillRect(this.x, this.y, this.bulletSize.width, this.bulletSize.height);
   }
+}
+
+class Monster {
+  constructor(monsterStats) {
+    this.monsterStats = monsterStats;
+  }
+
+  update() {}
+
+  draw(ctx) {}
 }
 
 export class GameList {
@@ -247,36 +252,29 @@ export class DrawingClass {
 }
 
 class Collistion {
-  static objectIsInCanvas(object, canvas) {
-    let isObjectInPosCanvasYAxis = object.movementData.y < 0;
-    let isObjectInNegCanvasYAxis =
-      object.movementData.y + object.statsData.height > canvas.height;
-
-    let isObjectInPosCanvasXAxis = object.movementData.x < 0;
-    let isObjectInNegCanvasXAxis =
-      object.movementData.x + object.statsData.width > canvas.width;
-
-    if (isObjectInPosCanvasYAxis) {
+  /**
+   * This function checks if the object is out of bounds of the canvas
+   * and if so, adjusts its position so that it stays within the canvas bounds.
+   *
+   * @param {Object} object - The object to check and adjust.
+   * @param {Object} canvas - The canvas to check against.
+   */
+  static CheckCanvasBounds(object, canvas) {
+    // If the object is out of bounds on the y-axis (top), move it to the top of the canvas
+    if (object.movementData.y < 0) {
       object.movementData.y = 0;
-    } else if (isObjectInNegCanvasYAxis) {
+    }
+    // If the object is out of bounds on the y-axis (bottom), move it to the bottom of the canvas
+    if (object.movementData.y + object.statsData.height > canvas.height) {
       object.movementData.y = canvas.height - object.statsData.height;
-    } else if (isObjectInPosCanvasXAxis) {
+    }
+    // If the object is out of bounds on the x-axis (left), move it to the left of the canvas
+    if (object.movementData.x < 0) {
       object.movementData.x = 0;
-    } else if (isObjectInNegCanvasXAxis) {
+    }
+    // If the object is out of bounds on the x-axis (right), move it to the right of the canvas
+    if (object.movementData.x + object.statsData.width > canvas.width) {
       object.movementData.x = canvas.width - object.statsData.width;
     }
-    // else if (isObjectInNegCanvasXAxis && isObjectInNegCanvasYAxis) {
-    //   object.movementData.x = canvas.width - object.statsData.width;
-    //   object.movementData.y = canvas.height - object.statsData.height;
-    // } else if (isObjectInNegCanvasXAxis && isObjectInPosCanvasYAxis) {
-    //   object.movementData.x = canvas.width - object.statsData.width;
-    //   object.movementData.y = 0;
-    // } else if (isObjectInPosCanvasXAxis && isObjectInNegCanvasYAxis) {
-    //   object.movementData.x = 0;
-    //   object.movementData.y = canvas.height - object.statsData.height;
-    // } else if (isObjectInPosCanvasXAxis && isObjectInPosCanvasYAxis) {
-    //   object.movementData.x = 0;
-    //   object.movementData.y = 0;
-    // }
   }
 }
