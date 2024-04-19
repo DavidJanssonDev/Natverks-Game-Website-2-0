@@ -4,7 +4,11 @@ import { resetDirection, updateDriection } from "./userController.js";
 //? PLayer UPDATE
 
 document.addEventListener("keydown", (event) =>
-  updateDriection(event, GameList.getPlayerObjectList())
+  updateDriection(
+    event,
+    GameList.getPlayerObjectList(),
+    GameList.getBulletObjectList()
+  )
 );
 document.addEventListener("keyup", (event) =>
   resetDirection(event, GameList.getPlayerObjectList())

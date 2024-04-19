@@ -14,6 +14,7 @@ export class Player {
     this.movementData = {
       x: playerData.startXPos,
       y: playerData.startYPos,
+      maximumAmoutOfBulletsToRender: 10,
       xSpeed: this.statsData.speed,
       ySpeed: this.statsData.speed,
       keys: {
@@ -32,9 +33,15 @@ export class Player {
         MouseRightBtn: false,
       },
 
+      KeysPressed: 0,
+
       direction: {
         xDir: null,
         yDir: null,
+        latestDirection: {
+          xDir: 1,
+          yDir: 0,
+        },
       },
     };
 
@@ -56,17 +63,25 @@ export class Player {
     this.movementData.direction.xDir =
       (this.movementData.keys.KeyRight || this.movementData.keys.RightArrow) -
       (this.movementData.keys.KeyLeft || this.movementData.keys.LeftArrow);
+
     this.movementData.direction.yDir =
       (this.movementData.keys.KeyDown || this.movementData.keys.DownArrow) -
       (this.movementData.keys.KeyUp || this.movementData.keys.UpArrow);
+
+    if (this.movementData.KeysPressed > 0) {
+      this.movementData.direction.latestDirection.xDir =
+        this.movementData.direction.xDir;
+      this.movementData.direction.latestDirection.yDir =
+        this.movementData.direction.yDir;
+    }
   }
 
   move() {
     this.setDirection();
     this.movementData.x +=
-      this.movementData.direction.dirXAxis * this.movementData.xSpeed;
+      this.movementData.direction.xDir * this.movementData.xSpeed;
     this.movementData.y +=
-      this.movementData.direction.dirYAxis * this.movementData.ySpeed;
+      this.movementData.direction.yDir * this.movementData.ySpeed;
   }
 
   update() {
@@ -97,12 +112,20 @@ export class Player {
   shoot() {
     const bulletPositionData = {
       bulletPos: {
-        x: this.movementData.x + this.bulletData.startPosOffset,
-        y: this.movementData.y + this.bulletData.startPosOffset,
+        x:
+          this.movementData.x +
+          this.movementData.direction.latestDirection.xDir *
+            this.bulletData.startPosOffset +
+          this.statsData.size.width / 2,
+        y:
+          this.movementData.y +
+          this.movementData.direction.latestDirection.yDir *
+            this.bulletData.startPosOffset +
+          this.statsData.size.height / 2,
       },
       bulletDirection: {
-        xDir: this.movementData.direction.xDir,
-        xDir: this.movementData.direction.yDir,
+        xDir: this.movementData.direction.latestDirection.xDir,
+        yDir: this.movementData.direction.latestDirection.yDir,
       },
       damage: this.bulletData.damage,
       speed: this.bulletData.speed,
@@ -124,8 +147,8 @@ class Bullet {
       width: bulletStats.size,
       height: bulletStats.size,
     };
-    this.x = bulletStats.x;
-    this.y = bulletStats.y;
+    this.x = bulletStats.bulletPos.x;
+    this.y = bulletStats.bulletPos.y;
 
     this.xSpeed = bulletStats.speed;
     this.ySpeed = bulletStats.speed;
@@ -203,6 +226,10 @@ export class GameList {
   static addBulletObject(object) {
     if (!(object instanceof Bullet)) return;
     GameList.bulletsObjectList.push(object);
+  }
+
+  static getBulletObjectList() {
+    return GameList.bulletsObjectList;
   }
 
   static removeBulletObject(object) {
