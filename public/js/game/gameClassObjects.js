@@ -31,6 +31,11 @@ export class Player {
         Space: false,
         MouseRightBtn: false,
       },
+
+      direction: {
+        xDir: null,
+        yDir: null,
+      },
     };
 
     this.bulletData = {
@@ -42,26 +47,26 @@ export class Player {
         width: playerData.projectalSize,
         height: playerData.projectalSize,
       },
-      direction: {
-        x: null,
-        y: null,
-      },
       startPosOffset: 5,
       color: "yellow",
     };
   }
 
-  move() {
-    let dirXAxis =
+  setDirection() {
+    this.movementData.direction.xDir =
       (this.movementData.keys.KeyRight || this.movementData.keys.RightArrow) -
       (this.movementData.keys.KeyLeft || this.movementData.keys.LeftArrow);
-
-    let dirYAxis =
+    this.movementData.direction.yDir =
       (this.movementData.keys.KeyDown || this.movementData.keys.DownArrow) -
       (this.movementData.keys.KeyUp || this.movementData.keys.UpArrow);
+  }
 
-    this.movementData.x += dirXAxis * this.movementData.xSpeed;
-    this.movementData.y += dirYAxis * this.movementData.ySpeed;
+  move() {
+    this.setDirection();
+    this.movementData.x +=
+      this.movementData.direction.dirXAxis * this.movementData.xSpeed;
+    this.movementData.y +=
+      this.movementData.direction.dirYAxis * this.movementData.ySpeed;
   }
 
   update() {
@@ -91,10 +96,14 @@ export class Player {
 
   shoot() {
     const bulletPositionData = {
-      x: this.movementData.x + this.bulletData.startPosOffset,
-      y: this.movementData.y + this.bulletData.startPosOffset,
-      xDirection: this.bulletData.direction.x,
-      yDirection: this.bulletData.direction.y,
+      bulletPos: {
+        x: this.movementData.x + this.bulletData.startPosOffset,
+        y: this.movementData.y + this.bulletData.startPosOffset,
+      },
+      bulletDirection: {
+        xDir: this.movementData.direction.xDir,
+        xDir: this.movementData.direction.yDir,
+      },
       damage: this.bulletData.damage,
       speed: this.bulletData.speed,
       size: this.bulletData.size,
@@ -108,8 +117,8 @@ export class Player {
 class Bullet {
   constructor(bulletStats) {
     this.bulletDirection = {
-      xDirection: bulletStats.xDirection,
-      yDirection: bulletStats.yDirection,
+      xDirection: bulletStats.bulletDirection.xDir,
+      yDirection: bulletStats.bulletDirection.yDir,
     };
     this.bulletSize = {
       width: bulletStats.size,
