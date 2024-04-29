@@ -1,5 +1,5 @@
-import { Player, GameList, DrawingClass } from "./gameClassObjects.js";
-import { resetDirection, updateDriection } from "./userController.js";
+import { DrawingClass, GameList, Player } from "./gameClassObjects.js";
+import { updateDriection, resetDirection } from "./userController.js";
 
 //? PLayer UPDATE
 
@@ -36,7 +36,6 @@ async function gameSetUp() {
   const data = await serverResponse.json();
   const json_data = JSON.parse(data);
 
-  console.table(json_data);
   const player = new Player(json_data);
 
   GameList.addPlayerObject(player);

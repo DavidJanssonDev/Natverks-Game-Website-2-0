@@ -1,3 +1,5 @@
+// #region PLAYER CLASS
+
 export class Player {
   constructor(playerData) {
     this.statsData = {
@@ -11,77 +13,64 @@ export class Player {
       characterColor: playerData.playerColor,
     };
 
-    this.movementData = {
+    this.postion = {
       x: playerData.startXPos,
       y: playerData.startYPos,
-      maximumAmoutOfBulletsToRender: 10,
-      xSpeed: this.statsData.speed,
-      ySpeed: this.statsData.speed,
-      keys: {
-        // WASD MOVEMENT KEYS
-        KeyUp: false,
-        KeyDown: false,
-        KeyLeft: false,
-        KeyRight: false,
-        // ARROW MOVEMENT KEYS
-        RightArrow: false,
-        LeftArrow: false,
-        UpArrow: false,
-        DownArrow: false,
-        // SHOOTING KEY
-        Space: false,
-        MouseRightBtn: false,
+    };
+
+    this.playerMovement = {
+      speed: {
+        x: playerData.Speed,
+        y: playerData.Speed,
       },
 
-      KeysPressed: 0,
-
       direction: {
-        xDir: null,
-        yDir: null,
-        latestDirection: {
-          xDir: 1,
-          yDir: 0,
-        },
+        x: 0,
+        y: 0,
       },
     };
 
-    this.bulletData = {
-      x: null,
-      y: null,
-      damage: this.statsData.damage,
-      speed: playerData.projectalSpeed,
-      size: {
-        width: playerData.projectalSize,
-        height: playerData.projectalSize,
+    this.playerControll = {
+      // WASD MOVEMENT KEYS
+      keys: {
+        KeyW: false,
+        KeyS: false,
+        KeyA: false,
+        KeyD: false,
       },
-      startPosOffset: 5,
-      color: "yellow",
+      arrowKeys: {
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+      },
+
+      // SHOOTING KEY
+      shotingKey: {
+        Space: false,
+      },
     };
   }
 
   setDirection() {
-    this.movementData.direction.xDir =
-      (this.movementData.keys.KeyRight || this.movementData.keys.RightArrow) -
-      (this.movementData.keys.KeyLeft || this.movementData.keys.LeftArrow);
+    this.playerMovement.direction.x =
+      (this.playerControll.keys.KeyD ||
+        this.playerControll.arrowKeys.ArrowRight) -
+      (this.playerControll.keys.KeyA ||
+        this.playerControll.arrowKeys.ArrowLeft);
 
-    this.movementData.direction.yDir =
-      (this.movementData.keys.KeyDown || this.movementData.keys.DownArrow) -
-      (this.movementData.keys.KeyUp || this.movementData.keys.UpArrow);
-
-    if (this.movementData.KeysPressed > 0) {
-      this.movementData.direction.latestDirection.xDir =
-        this.movementData.direction.xDir;
-      this.movementData.direction.latestDirection.yDir =
-        this.movementData.direction.yDir;
-    }
+    this.playerMovement.direction.y =
+      (this.playerControll.keys.KeyS ||
+        this.playerControll.arrowKeys.ArrowDown) -
+      (this.playerControll.keys.KeyW || this.playerControll.arrowKeys.ArrowUp);
   }
 
   move() {
     this.setDirection();
-    this.movementData.x +=
-      this.movementData.direction.xDir * this.movementData.xSpeed;
-    this.movementData.y +=
-      this.movementData.direction.yDir * this.movementData.ySpeed;
+    this.postion.x +=
+      this.playerMovement.direction.x * this.playerMovement.speed.x;
+    this.postion.y +=
+      this.playerMovement.direction.y * this.playerMovement.speed.y;
   }
 
   update() {
@@ -91,8 +80,8 @@ export class Player {
 
   draw(ctx) {
     const drawingInfo = {
-      x: this.movementData.x,
-      y: this.movementData.y,
+      x: this.postion.x,
+      y: this.postion.y,
       width: this.statsData.size.width,
       height: this.statsData.size.height,
     };
@@ -108,34 +97,9 @@ export class Player {
       drawingInfo.height
     );
   }
-
-  shoot() {
-    const bulletPositionData = {
-      bulletPos: {
-        x:
-          this.movementData.x +
-          this.movementData.direction.latestDirection.xDir *
-            this.bulletData.startPosOffset +
-          this.statsData.size.width / 2,
-        y:
-          this.movementData.y +
-          this.movementData.direction.latestDirection.yDir *
-            this.bulletData.startPosOffset +
-          this.statsData.size.height / 2,
-      },
-      bulletDirection: {
-        xDir: this.movementData.direction.latestDirection.xDir,
-        yDir: this.movementData.direction.latestDirection.yDir,
-      },
-      damage: this.bulletData.damage,
-      speed: this.bulletData.speed,
-      size: this.bulletData.size,
-      color: this.bulletData.color,
-    };
-    const bullet = new Bullet({ ...this.bulletData, ...bulletPositionData });
-    GameList.addBulletObject(bullet);
-  }
 }
+
+// #region CLASS BULLET
 
 class Bullet {
   constructor(bulletStats) {
@@ -197,6 +161,8 @@ class Monster {
   draw(ctx) {}
 }
 
+// #region  GameList
+
 export class GameList {
   static objectList = [];
   static playerObjectList = [];
@@ -241,8 +207,8 @@ export class GameList {
   static combindAllListTooObjectList() {
     GameList.objectList = [].concat(
       GameList.playerObjectList,
-      GameList.monsterObjectList,
-      GameList.bulletsObjectList
+      GameList.bulletsObjectList,
+      GameList.monsterObjectList
     );
   }
 
@@ -251,6 +217,8 @@ export class GameList {
     return GameList.objectList;
   }
 }
+
+// #region Drawing
 
 export class DrawingClass {
   static drawingTool = null;
@@ -287,6 +255,8 @@ export class DrawingClass {
   }
 }
 
+// #region Collistion
+
 class Collistion {
   /**
    * This function checks if the object is out of bounds of the canvas
@@ -297,20 +267,28 @@ class Collistion {
    */
   static CheckCanvasBounds(object, canvas) {
     // If the object is out of bounds on the y-axis (top), move it to the top of the canvas
-    if (object.movementData.y < 0) {
-      object.movementData.y = 0;
+    if (object.postion.y < 0) {
+      console.log("top");
+      object.postion.y = 0;
     }
     // If the object is out of bounds on the y-axis (bottom), move it to the bottom of the canvas
-    if (object.movementData.y + object.statsData.height > canvas.height) {
-      object.movementData.y = canvas.height - object.statsData.height;
+    if (object.postion.y + object.statsData.height > canvas.height) {
+      console.log("bottom");
+      object.postion.y = canvas.height - object.statsData.height;
     }
     // If the object is out of bounds on the x-axis (left), move it to the left of the canvas
-    if (object.movementData.x < 0) {
-      object.movementData.x = 0;
+    if (object.postion.x < 0) {
+      console.log("left");
+      object.postion.x = 0;
     }
     // If the object is out of bounds on the x-axis (right), move it to the right of the canvas
-    if (object.movementData.x + object.statsData.width > canvas.width) {
-      object.movementData.x = canvas.width - object.statsData.width;
+    if (object.postion.x + object.statsData.width > canvas.width) {
+      console.log("right");
+      object.postion.x = canvas.width - object.statsData.width;
     }
+    console.log(
+      "Tuching right: ",
+      object.postion.x + object.statsData.width > canvas.width
+    );
   }
 }
