@@ -1,4 +1,9 @@
-import { DrawingClass, GameList, Player } from "./gameClassObjects.js";
+import {
+  DrawingClass,
+  GameList,
+  Player,
+  MonsterWave,
+} from "./gameClassObjects.js";
 import { updateDriection, resetDirection } from "./userController.js";
 
 //? PLayer UPDATE
@@ -10,21 +15,19 @@ document.addEventListener("keydown", (event) =>
     GameList.getBulletObjectList()
   )
 );
+
 document.addEventListener("keyup", (event) =>
   resetDirection(event, GameList.getPlayerObjectList())
 );
 
-//* GAME UPDATE LOOP
-
 async function gameSetUp() {
   //* Setting up drawing tool
-
   const canvas = document.getElementById("canvas");
 
   DrawingClass.setCanvas(canvas);
   DrawingClass.setDrawingTool();
 
-  //* Setting up player
+  // Getting the data from the server
   const serverResponse = await fetch("/gameSetup", {
     method: "POST",
     headers: {
@@ -34,14 +37,14 @@ async function gameSetUp() {
   });
 
   const data = await serverResponse.json();
-  const json_data = JSON.parse(data);
+  const player_data = await JSON.parse(data);
 
-  const player = new Player(json_data);
-
+  const player = new Player(player_data);
   GameList.addPlayerObject(player);
 
   gameLoop();
 }
+
 function gameLoop() {
   // GET A LIST WITH ALL THE OBJECTS
   const ObjectList = GameList.getObjectList();
@@ -55,6 +58,14 @@ function gameLoop() {
     DrawingClass.draw(object);
   });
 
+  // Wave System
+  if (!MonsterWave.waveOnGoing) {
+    console.log(MonsterWave.currentWave);
+
+    MonsterWave.updateWave();
+    console.log(MonsterWave.currentWave);
+    MonsterWave.spawnWave(MonsterWave.currentWave);
+  }
   requestAnimationFrame(gameLoop);
 }
 

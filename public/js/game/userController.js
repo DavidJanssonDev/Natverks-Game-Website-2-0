@@ -38,6 +38,7 @@ export function updateDriection(event, player, bulletList) {
 
     case " ":
       player.playerControll.shotingKey.Space = true;
+      player.playerShoot();
       break;
   }
 }

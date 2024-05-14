@@ -1,6 +1,7 @@
+const Random = require("crypto-random");
 function randomNumber() {
   return Math.floor(
-    Math.random() * Math.pow(10, Math.floor(Math.random() + 1))
+    Random.value() * Math.pow(10, Math.floor(Random.value() + 1))
   );
 }
 

@@ -1,6 +1,5 @@
 //* ---------------------------------------------------------------------
 //* SERVER SET UPP
-
 const express = require("express");
 const session = require("express-session");
 const mysql = require("mysql2/promise");
@@ -171,7 +170,7 @@ app.post("/login", async function (_req, res) {
 
   const hashedPassword = user.password;
 
-  if (!(await bcrypt.compare(password, hashedPassword))) {
+  if (!bcrypt.compareSync(password, hashedPassword)) {
     res.status(400).json({
       login: false,
       status: 400,
