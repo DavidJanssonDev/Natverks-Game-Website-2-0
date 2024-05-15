@@ -273,7 +273,7 @@ export class MonsterWave {
 
   static typeOfMonster = {
     normal: {
-      type: "hard",
+      type: "normal",
       monsterStats: {
         health: 10,
         damage: 1,
@@ -318,28 +318,22 @@ export class MonsterWave {
 
   static waves = [
     {
-      monster: {
-        typeMonster: MonsterWave.typeOfMonster.normal.type,
-        monsterData: MonsterWave.typeOfMonster.normal.monsterStats,
-        timeBetweenMonster: 10,
-        amoutPerSpawn: 5,
-      },
+      typeMonster: MonsterWave.typeOfMonster.normal.type,
+      monsterData: MonsterWave.typeOfMonster.normal.monsterStats,
+      timeBetweenMonster: 10,
+      amoutPerSpawn: 5,
     },
     {
-      monster: {
-        typeMonster: MonsterWave.typeOfMonster.hard.type,
-        monsterData: MonsterWave.typeOfMonster.hard.monsterStats,
-        timeBetweenMonster: 10,
-        amoutPerSpawn: 5,
-      },
+      typeMonster: MonsterWave.typeOfMonster.hard.type,
+      monsterData: MonsterWave.typeOfMonster.hard.monsterStats,
+      timeBetweenMonster: 10,
+      amoutPerSpawn: 5,
     },
     {
-      monster: {
-        typeMonster: MonsterWave.typeOfMonster.boss.type,
-        monsterData: MonsterWave.typeOfMonster.boss.monsterStats,
-        timeBetweenMonster: 10,
-        amoutPerSpawn: 5,
-      },
+      typeMonster: MonsterWave.typeOfMonster.boss.type,
+      monsterData: MonsterWave.typeOfMonster.boss.monsterStats,
+      timeBetweenMonster: 10,
+      amoutPerSpawn: 5,
     },
   ];
 
@@ -368,18 +362,18 @@ export class MonsterWave {
     let waveindex = wave - 1;
     let waveData = MonsterWave.waves[waveindex];
     console.table(waveData);
-    debugger;
-    let dataStats = waveData.monsterData;
 
     if (waveData.typeMonster === "boss") {
-      GameList.addMonsterObject(new Boss(dataStats));
+      GameList.addMonsterObject(new Boss(waveData.monsterData));
     } else {
       for (
         let numberMonster = 0;
-        numberMonster < monsterData.amoutPerSpawn;
+        numberMonster < waveData.amoutPerSpawn;
         numberMonster++
       ) {
-        GameList.addMonsterObject(new Monster(dataStats));
+        setTimeout(() => {
+          GameList.addMonsterObject(new Monster(waveData.monsterData));
+        }, waveData.timeBetweenMonster * 1000);
       }
     }
   }
