@@ -181,7 +181,6 @@ export class Player extends GeneralObject {
       speedX = this.movement.speed.x;
       speedY = this.movement.speed.y;
     }
-    console.table(this.movement.speed);
 
     this.postion.x += this.movement.direction.x * speedX;
     this.postion.y += this.movement.direction.y * speedY;
@@ -242,11 +241,9 @@ class Bullet {
             return;
           }
         });
+      } else {
+        GameList.removeBulletObject(bulletObject);
       }
-      GameList.removeBulletObject(bulletObject);
-      GameList.getPlayerObjectList()[0].score += monsterObject.scorePoints;
-      GameList.getPlayerObjectList()[0].kills += 1;
-      return;
     });
   }
 
@@ -268,13 +265,15 @@ class Bullet {
 // #region CLASS MONSTER
 
 export class MonsterWave {
-  static waveOnGoing = false;
-  static currentWave = 0;
+  static currentMonsterIndex = 0;
+  static updatedMonster = false;
 
-  static typeOfMonster = {
-    normal: {
+  static typeOfMonster = [
+    {
       type: "normal",
+      spawnRate: 10,
       monsterStats: {
+        type: "normal",
         health: 10,
         damage: 1,
         speed: 1,
@@ -286,9 +285,11 @@ export class MonsterWave {
         },
       },
     },
-    hard: {
+    {
       type: "hard",
+      spawnRate: 5,
       monsterStats: {
+        type: "hard",
         health: 35,
         damage: 2,
         speed: 1.5,
@@ -300,9 +301,11 @@ export class MonsterWave {
         },
       },
     },
-    boss: {
+    {
       type: "boss",
+      spawnRate: 1,
       monsterStats: {
+        type: "boss",
         health: 35,
         damage: 2,
         speed: 1.5,
@@ -314,68 +317,51 @@ export class MonsterWave {
         },
       },
     },
-  };
-
-  static waves = [
-    {
-      typeMonster: MonsterWave.typeOfMonster.normal.type,
-      monsterData: MonsterWave.typeOfMonster.normal.monsterStats,
-      timeBetweenMonster: 10,
-      amoutPerSpawn: 5,
-    },
-    {
-      typeMonster: MonsterWave.typeOfMonster.hard.type,
-      monsterData: MonsterWave.typeOfMonster.hard.monsterStats,
-      timeBetweenMonster: 10,
-      amoutPerSpawn: 5,
-    },
-    {
-      typeMonster: MonsterWave.typeOfMonster.boss.type,
-      monsterData: MonsterWave.typeOfMonster.boss.monsterStats,
-      timeBetweenMonster: 10,
-      amoutPerSpawn: 5,
-    },
   ];
+  static currentMonster = MonsterWave.typeOfMonster[0];
+  static spawnRate = MonsterWave.currentMonster.spawnRate;
+  static amoutOfSpawning = 0;
 
-  static updateWave() {
-    if (GameList.monsterObjectList.length === 0) {
-      switch (MonsterWave.currentWave) {
-        case 0:
-          MonsterWave.currentWave = 1;
-          break;
-        case 1:
-          MonsterWave.currentWave = 2;
-          break;
-        case 2:
-          MonsterWave.currentWave = 3;
-          break;
-        case 3:
-          console.log("GAME IS ALL DONE U WON");
-          break;
-      }
+  static updateMonsterWave() {
+    console.log("UPDATE WAVE OF MONSTER !!!");
+    if (
+      MonsterWave.amoutOfSpawning == 11 &&
+      MonsterWave.updatedMonster == false
+    ) {
+      MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
+      MonsterWave.updatedMonster = true;
+    } else if (
+      MonsterWave.amoutOfSpawning == 21 &&
+      MonsterWave.updatedMonster == true
+    ) {
+      MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
     }
+    MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
   }
 
-  static spawnWave(wave) {
-    MonsterWave.waveOnGoing = true;
-    console.table(MonsterWave.waves);
-    let waveindex = wave - 1;
-    let waveData = MonsterWave.waves[waveindex];
-    console.table(waveData);
-
-    if (waveData.typeMonster === "boss") {
-      GameList.addMonsterObject(new Boss(waveData.monsterData));
-    } else {
-      for (
-        let numberMonster = 0;
-        numberMonster < waveData.amoutPerSpawn;
-        numberMonster++
-      ) {
-        setTimeout(() => {
-          GameList.addMonsterObject(new Monster(waveData.monsterData));
-        }, waveData.timeBetweenMonster * 1000);
+  static spawnMonster() {
+    setInterval(() => {
+      console.table(GameList.monsterObjectList);
+      if (MonsterWave.currentMonster.type == "boss") {
+        GameList.addMonsterObject(
+          new Boss(MonsterWave.currentMonster.monsterStats)
+        );
+      } else {
+        let monsterObjectStats = MonsterWave.currentMonster;
+        console.log("Monster Object Stats:", monsterObjectStats);
+        let monster = new Monster(MonsterWave.currentMonster.monsterStats);
+        console.log("Monster:", monster);
+        GameList.addMonsterObject(monster);
+        MonsterWave.amoutOfSpawning++;
       }
-    }
+
+      if (
+        MonsterWave.amoutOfSpawning == 10 ||
+        MonsterWave.amoutOfSpawning == 20
+      ) {
+        MonsterWave.updatedMonster = false;
+      }
+    }, 1000);
   }
 }
 
@@ -390,13 +376,17 @@ class Monster extends GeneralObject {
         width: monsterStats.size.width,
         height: monsterStats.size.height,
       },
-    });
-    this.stats = {
-      size: {
-        width: monsterStats.size.width,
-        height: monsterStats.size.height,
+      postion: {
+        x: monsterStats.xStart,
+        y: monsterStats.yStart,
       },
+    });
+
+    this.stats.size = {
+      width: monsterStats.size.width,
+      height: monsterStats.size.height,
     };
+    this.stats.typeMonster = monsterStats.type;
 
     this.movement = {
       direction: {
@@ -424,7 +414,6 @@ export class GameList {
   }
   static addMonsterObject(...objects) {
     for (const obj of objects) {
-      if (obj instanceof Monster) return;
       GameList.monsterObjectList.push(obj);
     }
   }
