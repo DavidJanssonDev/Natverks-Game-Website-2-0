@@ -42,8 +42,7 @@ async function gameSetUp() {
   const player = new Player(player_data);
   GameList.addPlayerObject(player);
 
-  MonsterWave.updateMonsterWave();
-  MonsterWave.spawnMonster();
+  MonsterWave.startSpawningOfMonsters();
   gameLoop();
 }
 
@@ -61,7 +60,6 @@ function gameLoop() {
   });
 
   // Wave System
-  MonsterWave.updateMonsterWave();
 
   requestAnimationFrame(gameLoop);
 }

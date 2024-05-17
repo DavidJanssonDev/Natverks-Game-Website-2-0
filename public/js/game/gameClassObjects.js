@@ -33,8 +33,6 @@ class GeneralObject {
 
     ctx.fillStyle = this.stats.color;
 
-    // console.table(drawingInfo);
-
     ctx.fillRect(
       drawingInfo.x,
       drawingInfo.y,
@@ -149,7 +147,6 @@ export class Player extends GeneralObject {
 
       GameList.addBulletObject(bullet);
     }
-    console.log(GameList.bulletsObjectList);
   }
 
   setDirection() {
@@ -157,16 +154,19 @@ export class Player extends GeneralObject {
       this.shootingDirection = Object.assign({}, this.movement.direction);
     }
 
-    this.movement.direction.x =
-      (this.playerControll.keys.KeyD ||
-        this.playerControll.arrowKeys.ArrowRight) -
-      (this.playerControll.keys.KeyA ||
-        this.playerControll.arrowKeys.ArrowLeft);
+    this.movement.direction = {
+      x:
+        (this.playerControll.keys.KeyD ||
+          this.playerControll.arrowKeys.ArrowRight) -
+        (this.playerControll.keys.KeyA ||
+          this.playerControll.arrowKeys.ArrowLeft),
 
-    this.movement.direction.y =
-      (this.playerControll.keys.KeyS ||
-        this.playerControll.arrowKeys.ArrowDown) -
-      (this.playerControll.keys.KeyW || this.playerControll.arrowKeys.ArrowUp);
+      y:
+        (this.playerControll.keys.KeyS ||
+          this.playerControll.arrowKeys.ArrowDown) -
+        (this.playerControll.keys.KeyW ||
+          this.playerControll.arrowKeys.ArrowUp),
+    };
   }
 
   move() {
@@ -228,7 +228,6 @@ class Bullet {
   }
 
   handleCollisionWithOtherObjects() {
-    console.log("bullet list", GameList.bulletsObjectList);
     GameList.bulletsObjectList.forEach((bulletObject) => {
       if (!Collistion.CheckCanvasBounds(bulletObject, DrawingClass.canvas)) {
         GameList.monsterObjectList.forEach((monsterObject) => {
@@ -262,12 +261,9 @@ class Bullet {
   }
 }
 
-// #region CLASS MONSTER
+//#region MonsterWave Class
 
 export class MonsterWave {
-  static currentMonsterIndex = 0;
-  static updatedMonster = false;
-
   static typeOfMonster = [
     {
       type: "normal",
@@ -280,8 +276,8 @@ export class MonsterWave {
         scoreWorth: 1,
         color: "red",
         size: {
-          width: 15,
-          height: 15,
+          width: 3,
+          height: 3,
         },
       },
     },
@@ -296,8 +292,8 @@ export class MonsterWave {
         scoreWorth: 2,
         color: "blue",
         size: {
-          width: 30,
-          height: 30,
+          width: 5,
+          height: 5,
         },
       },
     },
@@ -312,8 +308,8 @@ export class MonsterWave {
         scoreWorth: 2,
         color: "green",
         size: {
-          width: 30,
-          height: 30,
+          width: 7.5,
+          height: 7.5,
         },
       },
     },
@@ -322,49 +318,88 @@ export class MonsterWave {
   static spawnRate = MonsterWave.currentMonster.spawnRate;
   static amoutOfSpawning = 0;
 
-  static updateMonsterWave() {
-    console.log("UPDATE WAVE OF MONSTER !!!");
-    if (
-      MonsterWave.amoutOfSpawning == 11 &&
-      MonsterWave.updatedMonster == false
-    ) {
-      MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
-      MonsterWave.updatedMonster = true;
-    } else if (
-      MonsterWave.amoutOfSpawning == 21 &&
-      MonsterWave.updatedMonster == true
-    ) {
-      MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
+  static getMonsterPos(type) {
+    let x, y;
+    let side = Math.floor(Math.random() * 4);
+
+    if (type == "boss") {
+      x = DrawingClass.canvas.width / 2 - 7.5;
+      y = DrawingClass.canvas.height / 2 - 7.5;
     }
-    MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
+
+    switch (side) {
+      case 0:
+        x = 0;
+        y = Math.floor(Math.random() * DrawingClass.canvas.height);
+        break;
+      case 1:
+        x =
+          DrawingClass.canvas.width -
+          MonsterWave.currentMonster.monsterStats.size.width;
+        y = Math.floor(Math.random() * DrawingClass.canvas.height);
+        break;
+      case 2:
+        x = Math.floor(Math.random() * DrawingClass.canvas.width);
+        y = 0;
+        break;
+      case 3:
+        x = Math.floor(Math.random() * DrawingClass.canvas.width);
+        y =
+          DrawingClass.canvas.height -
+          MonsterWave.currentMonster.monsterStats.size.height;
+        break;
+    }
+
+    return [x, y];
   }
 
-  static spawnMonster() {
+  static debugAllMonsterPos() {
+    let positonList = [];
+    let monsterList = GameList.monsterObjectList;
+    monsterList.sort((a, b) => a.postion.x - b.postion.x);
+    monsterList.forEach((monster) => {
+      positonList.push(monster.postion);
+    });
+  }
+
+  static startSpawningOfMonsters() {
+    let monsterStartX;
+    let monsterStartY;
+
+    // THE SPAWNING OF THE MONSTER
     setInterval(() => {
-      console.table(GameList.monsterObjectList);
+      [monsterStartX, monsterStartY] = MonsterWave.getMonsterPos(
+        MonsterWave.currentMonster.type
+      );
       if (MonsterWave.currentMonster.type == "boss") {
         GameList.addMonsterObject(
           new Boss(MonsterWave.currentMonster.monsterStats)
         );
       } else {
-        let monsterObjectStats = MonsterWave.currentMonster;
-        console.log("Monster Object Stats:", monsterObjectStats);
         let monster = new Monster(MonsterWave.currentMonster.monsterStats);
-        console.log("Monster:", monster);
+
+        monster.postion = {
+          x: monsterStartX,
+          y: monsterStartY,
+        };
         GameList.addMonsterObject(monster);
         MonsterWave.amoutOfSpawning++;
       }
 
-      if (
-        MonsterWave.amoutOfSpawning == 10 ||
-        MonsterWave.amoutOfSpawning == 20
-      ) {
-        MonsterWave.updatedMonster = false;
+      if (MonsterWave.amoutOfSpawning > 10) {
+        MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
+      }
+      if (MonsterWave.amoutOfSpawning > 20) {
+        MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
+      }
+      MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
+      if (MonsterWave.currentMonster.type == "boss") {
+        MonsterWave.debugAllMonsterPos();
       }
     }, 1000);
   }
 }
-
+// #region CLASS MONSTER
 class Monster extends GeneralObject {
   constructor(monsterStats) {
     super({
@@ -396,7 +431,19 @@ class Monster extends GeneralObject {
     };
   }
 
-  update() {}
+  update() {
+    this.move();
+  }
+
+  move() {
+    let playerPos = GameList.getPlayerObjectList().postion;
+
+    this.movement.direction.x = playerPos.x - this.postion.x;
+    this.movement.direction.y = playerPos.y - this.postion.y;
+
+    this.postion.x += this.movement.direction.x * this.stats.speed;
+    this.postion.y += this.movement.direction.y * this.stats.speed;
+  }
 }
 
 // #region  GameList
@@ -438,13 +485,11 @@ export class GameList {
   static removeBulletObject(object) {
     if (!(object instanceof Bullet)) return;
 
-    console.log("bullet list", GameList.bulletsObjectList);
     let BulletIndex = GameList.bulletsObjectList.findIndex(
       (bullet) => bullet === object
     );
 
     GameList.bulletsObjectList.splice(BulletIndex, 1);
-    console.log("bullet list", GameList.bulletsObjectList);
   }
 
   static getObjectList() {
