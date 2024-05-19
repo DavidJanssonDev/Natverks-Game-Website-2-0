@@ -121,6 +121,7 @@ export class Player extends GeneralObject {
         x: 1,
         y: 0,
       },
+      player: this,
     };
 
     if (
@@ -182,8 +183,8 @@ export class Player extends GeneralObject {
       speedY = this.movement.speed.y;
     }
 
-    this.postion.x += this.movement.direction.x * speedX;
-    this.postion.y += this.movement.direction.y * speedY;
+    this.postion.x += Math.round(this.movement.direction.x * speedX);
+    this.postion.y += Math.round(this.movement.direction.y * speedY);
   }
 
   update() {
@@ -195,6 +196,13 @@ export class Player extends GeneralObject {
     return !(
       this.movement.direction.x === 0 && this.movement.direction.y === 0
     );
+  }
+
+  middelPos() {
+    return {
+      x: this.postion.x + this.stats.size.width / 2,
+      y: this.postion.y + this.stats.size.height / 2,
+    };
   }
 }
 
@@ -210,6 +218,7 @@ class Bullet {
       },
       damage: bulletStats.damage,
       speed: bulletStats.speed,
+      player: bulletStats.player,
     };
 
     this.movement = {
@@ -230,17 +239,18 @@ class Bullet {
   handleCollisionWithOtherObjects() {
     GameList.bulletsObjectList.forEach((bulletObject) => {
       if (!Collistion.CheckCanvasBounds(bulletObject, DrawingClass.canvas)) {
+        console.log("NOT TOUCHING THE CANVAS BORDERS");
         GameList.monsterObjectList.forEach((monsterObject) => {
           if (Collistion.ObjectOverlapping(monsterObject, this)) {
             GameList.removeMonsterObject(monsterObject);
             GameList.removeBulletObject(bulletObject);
-            GameList.getPlayerObjectList()[0].score +=
-              monsterObject.scorePoints;
-            GameList.getPlayerObjectList()[0].kills += 1;
+            this.stats.player.score += monsterObject.scorePoints;
+            this.stats.player.kills += 1;
             return;
           }
         });
       } else {
+        console.log("TOUCHING THE CANVAS BORDERS");
         GameList.removeBulletObject(bulletObject);
       }
     });
@@ -436,14 +446,28 @@ class Monster extends GeneralObject {
   }
 
   move() {
-    let playerPos = GameList.getPlayerObjectList().postion;
+    let speedX;
+    let speedY;
+    let angel;
+    let monsterAngel = {
+      x: 0,
+      y: 0,
+    };
+    let playerPos = GameList.getPlayerObjectList().middelPos();
 
-    this.movement.direction.x = playerPos.x - this.postion.x;
-    this.movement.direction.y = playerPos.y - this.postion.y;
+    angel = Math.atan2(
+      playerPos.y - this.postion.y - this.stats.size.height / 2,
+      playerPos.x - this.postion.x - this.stats.size.width / 2
+    );
 
-    this.postion.x += this.movement.direction.x * this.stats.speed;
-    this.postion.y += this.movement.direction.y * this.stats.speed;
+    monsterAngel.x = Math.cos(angel);
+    monsterAngel.y = Math.sin(angel);
+
+    this.postion.x += Math.round(monsterAngel.x * this.stats.speed);
+    this.postion.y += Math.round(monsterAngel.y * this.stats.speed);
   }
+
+  damagePlayer() {}
 }
 
 // #region  GameList
