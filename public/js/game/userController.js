@@ -1,25 +1,5 @@
 export function updateDriection(event, player, bulletList) {
   switch (event.key) {
-    case "a":
-      player.playerControll.keys.KeyA = true;
-
-      break;
-
-    case "d":
-      player.playerControll.keys.KeyD = true;
-
-      break;
-
-    case "w":
-      player.playerControll.keys.KeyW = true;
-
-      break;
-
-    case "s":
-      player.playerControll.keys.KeyS = true;
-
-      break;
-
     case "ArrowLeft":
       player.playerControll.arrowKeys.ArrowLeft = true;
       break;
@@ -45,22 +25,6 @@ export function updateDriection(event, player, bulletList) {
 
 export function resetDirection(event, player) {
   switch (event.key) {
-    case "a":
-      player.playerControll.keys.KeyA = false;
-      break;
-
-    case "d":
-      player.playerControll.keys.KeyD = false;
-      break;
-
-    case "w":
-      player.playerControll.keys.KeyW = false;
-      break;
-
-    case "s":
-      player.playerControll.keys.KeyS = false;
-      break;
-
     case "ArrowLeft":
       player.playerControll.arrowKeys.ArrowLeft = false;
       break;

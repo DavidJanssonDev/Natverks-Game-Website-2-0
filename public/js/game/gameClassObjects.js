@@ -3,7 +3,7 @@ class GeneralObject {
   constructor(stats) {
     this.stats = {
       health: stats.health,
-      damage: stats.damage,
+
       speed: stats.speed,
       color: stats.color,
       size: stats.size,
@@ -47,7 +47,6 @@ export class Player extends GeneralObject {
   constructor(playerData) {
     super({
       health: playerData.Health,
-      damage: playerData.Damage,
       speed: playerData.Speed,
       color: playerData.playerColor,
       size: {
@@ -66,13 +65,6 @@ export class Player extends GeneralObject {
     };
 
     this.playerControll = {
-      // WASD MOVEMENT KEYS
-      keys: {
-        KeyW: false,
-        KeyS: false,
-        KeyA: false,
-        KeyD: false,
-      },
       arrowKeys: {
         ArrowUp: false,
         ArrowDown: false,
@@ -114,7 +106,6 @@ export class Player extends GeneralObject {
         height: this.bulletSize,
       },
       speed: this.bulletSpeed,
-      damage: this.stats.damage,
       x: null,
       y: null,
       direction: {
@@ -157,16 +148,12 @@ export class Player extends GeneralObject {
 
     this.movement.direction = {
       x:
-        (this.playerControll.keys.KeyD ||
-          this.playerControll.arrowKeys.ArrowRight) -
-        (this.playerControll.keys.KeyA ||
-          this.playerControll.arrowKeys.ArrowLeft),
+        this.playerControll.arrowKeys.ArrowRight -
+        this.playerControll.arrowKeys.ArrowLeft,
 
       y:
-        (this.playerControll.keys.KeyS ||
-          this.playerControll.arrowKeys.ArrowDown) -
-        (this.playerControll.keys.KeyW ||
-          this.playerControll.arrowKeys.ArrowUp),
+        this.playerControll.arrowKeys.ArrowDown -
+        this.playerControll.arrowKeys.ArrowUp,
     };
   }
 
@@ -204,6 +191,10 @@ export class Player extends GeneralObject {
       y: this.postion.y + this.stats.size.height / 2,
     };
   }
+
+  takeDamage(damage) {
+    this.stats.health -= damage;
+  }
 }
 
 // #region CLASS BULLET
@@ -216,7 +207,6 @@ class Bullet {
         width: bulletStats.size.width,
         height: bulletStats.size.height,
       },
-      damage: bulletStats.damage,
       speed: bulletStats.speed,
       player: bulletStats.player,
     };
@@ -237,23 +227,23 @@ class Bullet {
   }
 
   handleCollisionWithOtherObjects() {
-    GameList.bulletsObjectList.forEach((bulletObject) => {
-      if (!Collistion.CheckCanvasBounds(bulletObject, DrawingClass.canvas)) {
-        console.log("NOT TOUCHING THE CANVAS BORDERS");
-        GameList.monsterObjectList.forEach((monsterObject) => {
-          if (Collistion.ObjectOverlapping(monsterObject, this)) {
-            GameList.removeMonsterObject(monsterObject);
-            GameList.removeBulletObject(bulletObject);
-            this.stats.player.score += monsterObject.scorePoints;
-            this.stats.player.kills += 1;
-            return;
-          }
-        });
-      } else {
-        console.log("TOUCHING THE CANVAS BORDERS");
-        GameList.removeBulletObject(bulletObject);
+    if (Collistion.CheckCanvasBounds(this, DrawingClass.canvas))
+      GameList.removeBulletObject(this);
+
+    for (let i = 0; i < GameList.monsterObjectList.length; i++) {
+      console.table({
+        bullet: this,
+        monster: GameList.monsterObjectList[i],
+      });
+      if (Collistion.ObjectOverlapping(this, GameList.monsterObjectList[i])) {
+        GameList.playerObjectList[0].score +=
+          GameList.monsterObjectList[i].stats.scoreWorth;
+        GameList.removeMonsterObject(GameList.monsterObjectList[i]);
+        console.log("Damage done");
       }
-    });
+
+      break;
+    }
   }
 
   update() {
@@ -261,7 +251,8 @@ class Bullet {
     this.handleCollisionWithOtherObjects();
   }
   draw(ctx) {
-    ctx.fillStyle = this.stats.color;
+    ctx.fillStyle = "green";
+
     ctx.fillRect(
       this.postion.x,
       this.postion.y,
@@ -363,50 +354,39 @@ export class MonsterWave {
     return [x, y];
   }
 
-  static debugAllMonsterPos() {
-    let positonList = [];
-    let monsterList = GameList.monsterObjectList;
-    monsterList.sort((a, b) => a.postion.x - b.postion.x);
-    monsterList.forEach((monster) => {
-      positonList.push(monster.postion);
-    });
-  }
-
   static startSpawningOfMonsters() {
     let monsterStartX;
     let monsterStartY;
+    let timer = 1000;
 
+    while (timer > 0) {
+      timer -= 1;
+    }
+
+    [monsterStartX, monsterStartY] = MonsterWave.getMonsterPos(
+      MonsterWave.currentMonster.type
+    );
+
+    let monster = new Monster(MonsterWave.currentMonster.monsterStats);
+
+    monster.postion = {
+      x: monsterStartX,
+      y: monsterStartY,
+    };
+    GameList.addMonsterObject(monster);
+    MonsterWave.amoutOfSpawning++;
+
+    if (MonsterWave.amoutOfSpawning > 10) {
+      MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
+    }
+    if (MonsterWave.amoutOfSpawning > 20) {
+      MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
+    }
+    MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
     // THE SPAWNING OF THE MONSTER
-    setInterval(() => {
-      [monsterStartX, monsterStartY] = MonsterWave.getMonsterPos(
-        MonsterWave.currentMonster.type
-      );
-      if (MonsterWave.currentMonster.type == "boss") {
-        GameList.addMonsterObject(
-          new Boss(MonsterWave.currentMonster.monsterStats)
-        );
-      } else {
-        let monster = new Monster(MonsterWave.currentMonster.monsterStats);
+    // setInterval(() => {
 
-        monster.postion = {
-          x: monsterStartX,
-          y: monsterStartY,
-        };
-        GameList.addMonsterObject(monster);
-        MonsterWave.amoutOfSpawning++;
-      }
-
-      if (MonsterWave.amoutOfSpawning > 10) {
-        MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
-      }
-      if (MonsterWave.amoutOfSpawning > 20) {
-        MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
-      }
-      MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
-      if (MonsterWave.currentMonster.type == "boss") {
-        MonsterWave.debugAllMonsterPos();
-      }
-    }, 1000);
+    // }, 10000);
   }
 }
 // #region CLASS MONSTER
@@ -453,7 +433,7 @@ class Monster extends GeneralObject {
       x: 0,
       y: 0,
     };
-    let playerPos = GameList.getPlayerObjectList().middelPos();
+    let playerPos = GameList.getPlayerObject().middelPos();
 
     angel = Math.atan2(
       playerPos.y - this.postion.y - this.stats.size.height / 2,
@@ -467,7 +447,9 @@ class Monster extends GeneralObject {
     this.postion.y += Math.round(monsterAngel.y * this.stats.speed);
   }
 
-  damagePlayer() {}
+  damagePlayer() {
+    GameList.getPlayerObject().takeDamage(this.stats.damage);
+  }
 }
 
 // #region  GameList
@@ -494,7 +476,7 @@ export class GameList {
     GameList.bulletsObjectList.push(object);
   }
 
-  static getPlayerObjectList() {
+  static getPlayerObject() {
     return GameList.playerObjectList.find((player) => player instanceof Player);
   }
   static removeMonsterObject(object) {

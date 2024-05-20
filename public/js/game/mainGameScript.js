@@ -11,13 +11,13 @@ import { updateDriection, resetDirection } from "./userController.js";
 document.addEventListener("keydown", (event) =>
   updateDriection(
     event,
-    GameList.getPlayerObjectList(),
+    GameList.getPlayerObject(),
     GameList.getBulletObjectList()
   )
 );
 
 document.addEventListener("keyup", (event) =>
-  resetDirection(event, GameList.getPlayerObjectList())
+  resetDirection(event, GameList.getPlayerObject())
 );
 
 async function gameSetUp() {
@@ -43,10 +43,34 @@ async function gameSetUp() {
   GameList.addPlayerObject(player);
 
   MonsterWave.startSpawningOfMonsters();
-  gameLoop();
+  // gameLoop();
+
+  saveScoreToDB();
+}
+
+async function saveScoreToDB() {
+  const player = GameList.getPlayerObject();
+  const server_response = await fetch("/saveScore", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ score: player.score, name: player.name }),
+  });
+
+  const data = await server_response.json();
+
+  if (data.saveScore) {
+    console.log("Score saved");
+    location.href = "/leaderboard";
+  } else {
+    console.log("Score not saved");
+  }
 }
 
 function gameLoop() {
+  if (GameList.getPlayerObject().health <= 0) return;
+
   // GET A LIST WITH ALL THE OBJECTS
   const ObjectList = GameList.getObjectList();
 

@@ -245,11 +245,44 @@ app.post("/signup", async function (_req, res) {
   console.log("Signup FAIL");
 });
 
+//~ Leaderboard save
+app.post("/saveScore", async function (_req, res) {
+  const connection = await createConectionDB();
+  const { score, username } = _req.body;
+
+  if (!score || !username) {
+    res.status(400).json({
+      saveScore: false,
+      status: 400,
+      message: "Score not saved, missing score or name",
+    });
+    return;
+  }
+
+  if (!(await isUserInDB(connection, username))) {
+    res.status(400).json({
+      saveScore: false,
+      status: 400,
+      message: "Score not saved, user not found",
+    });
+    return;
+  }
+
+  const sql = `INSERT INTO scores (username, score) VALUES (?, ?) IF NOT EXISTS`;
+  const [result] = await connection.execute(sql, [username]);
+});
+
 //* -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
 
 //~ GAME START UP
 app.post("/gameSetup", function (_req, res) {
-  const environmentPlayerDeaultStats = process.env.PLAYER_DEAFULT_STATS;
+  let environmentPlayerDeaultStats = process.env.PLAYER_DEAFULT_STATS;
+
+  let newENVplayerDeaultStats = JSON.parse(environmentPlayerDeaultStats);
+  newENVplayerDeaultStats.username = _req.session.username;
+
+  environmentPlayerDeaultStats = JSON.stringify(newENVplayerDeaultStats);
+
   res.json(environmentPlayerDeaultStats);
 });
 
