@@ -248,13 +248,17 @@ app.post("/signup", async function (_req, res) {
 //~ Leaderboard save
 app.post("/saveScore", async function (_req, res) {
   const connection = await createConectionDB();
-  const { score, username } = _req.body;
+  const { score } = _req.body;
+  const { username } = _req.session;
 
   if (!score || !username) {
+    console.log(`SCORE: ${score} USERNAME: ${username}`);
     res.status(400).json({
       saveScore: false,
       status: 400,
       message: "Score not saved, missing score or name",
+      username: username,
+      score: score,
     });
     return;
   }
@@ -268,22 +272,23 @@ app.post("/saveScore", async function (_req, res) {
     return;
   }
 
-  const sql = `INSERT INTO scores (username, score) VALUES (?, ?) IF NOT EXISTS`;
-  const [result] = await connection.execute(sql, [username]);
+  const sql = `UPDATE users SET score = (?)
+  WHERE username = (?)`;
+
+  const [result] = await connection.execute(sql, [score, username]);
+  return res.json({
+    saveScore: true,
+    status: 200,
+    message: "Score saved",
+    resultmessage: result.message,
+  });
 });
 
 //* -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
 
 //~ GAME START UP
 app.post("/gameSetup", function (_req, res) {
-  let environmentPlayerDeaultStats = process.env.PLAYER_DEAFULT_STATS;
-
-  let newENVplayerDeaultStats = JSON.parse(environmentPlayerDeaultStats);
-  newENVplayerDeaultStats.username = _req.session.username;
-
-  environmentPlayerDeaultStats = JSON.stringify(newENVplayerDeaultStats);
-
-  res.json(environmentPlayerDeaultStats);
+  res.json(process.env.PLAYER_DEAFULT_STATS);
 });
 
 // ---------------------------------------------------------------------

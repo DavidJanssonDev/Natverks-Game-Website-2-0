@@ -55,7 +55,7 @@ async function saveScoreToDB() {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ score: player.score, name: player.name }),
+    body: JSON.stringify({ score: player.score }),
   });
 
   const data = await server_response.json();
