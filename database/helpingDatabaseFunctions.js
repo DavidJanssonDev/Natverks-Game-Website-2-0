@@ -17,6 +17,20 @@ async function createConectionDB() {
   });
 }
 
+async function getScoreData() {
+  /**
+   * Retrieves the top 10 scores from the database.
+   *
+   * @return {Promise} A Promise that resolves to an array of top 10 scores.
+   */
+
+  const connection = await createConectionDB();
+
+  let sql = `SELECT username, score FROM users ORDER BY score DESC LIMIT 10`;
+  let [result] = await connection.execute(sql);
+  return result;
+}
+
 async function isUserInDB(connection, username) {
   /**
    * Check if a user exists in the database.
@@ -98,4 +112,5 @@ module.exports = {
   isUserInDB,
   getUserFromDB,
   createUserInDB,
+  getScoreData,
 };

@@ -1,0 +1,9 @@
+{{! Create a table with the leaderboard data from the server }}
+<table class="leaderboard-table">
+  {{#each leaderboardData}}
+    <tr>
+      <td>{{this.username}}</td>
+      <td>{{this.score}}</td>
+    </tr>
+  {{/each}}
+</table>

@@ -3,7 +3,6 @@ class GeneralObject {
   constructor(stats) {
     this.stats = {
       health: stats.health,
-
       speed: stats.speed,
       color: stats.color,
       size: stats.size,
@@ -177,6 +176,19 @@ export class Player extends GeneralObject {
   update() {
     this.move();
     Collistion.CheckCanvasBounds(this, DrawingClass.canvas);
+    this.checkCollitionWithOtherObjects();
+  }
+
+  checkCollitionWithOtherObjects() {
+    GameList.monsterObjectList.forEach((monster) => {
+      if (Collistion.ObjectTouching(this, monster) && !monster.dealtDamage) {
+        this.stats.health -= 1;
+        monster.dealtDamage = true;
+      }
+      if (monster.dealtDamage) {
+        GameList.removeMonsterObject(monster);
+      }
+    });
   }
 
   isMoving() {
@@ -190,10 +202,6 @@ export class Player extends GeneralObject {
       x: this.postion.x + this.stats.size.width / 2,
       y: this.postion.y + this.stats.size.height / 2,
     };
-  }
-
-  takeDamage(damage) {
-    this.stats.health -= damage;
   }
 }
 
@@ -210,7 +218,7 @@ class Bullet {
       speed: bulletStats.speed,
       player: bulletStats.player,
     };
-
+    this.objectHit = false;
     this.movement = {
       direction: bulletStats.direction,
     };
@@ -231,15 +239,15 @@ class Bullet {
       GameList.removeBulletObject(this);
 
     for (let i = 0; i < GameList.monsterObjectList.length; i++) {
-      console.table({
-        bullet: this,
-        monster: GameList.monsterObjectList[i],
-      });
-      if (Collistion.ObjectOverlapping(this, GameList.monsterObjectList[i])) {
+      if ((Collistion.ObjectTouching(GameList.monsterObjectList[i]), this)) {
+        this.objectHit = true;
         GameList.playerObjectList[0].score +=
           GameList.monsterObjectList[i].stats.scoreWorth;
+
+        console.log("hit", GameList.playerObjectList[0].score);
+      }
+      if (this.objectHit) {
         GameList.removeMonsterObject(GameList.monsterObjectList[i]);
-        console.log("Damage done");
       }
 
       break;
@@ -268,49 +276,14 @@ export class MonsterWave {
   static typeOfMonster = [
     {
       type: "normal",
-      spawnRate: 10,
       monsterStats: {
         type: "normal",
-        health: 10,
-        damage: 1,
         speed: 1,
         scoreWorth: 1,
         color: "red",
         size: {
           width: 3,
           height: 3,
-        },
-      },
-    },
-    {
-      type: "hard",
-      spawnRate: 5,
-      monsterStats: {
-        type: "hard",
-        health: 35,
-        damage: 2,
-        speed: 1.5,
-        scoreWorth: 2,
-        color: "blue",
-        size: {
-          width: 5,
-          height: 5,
-        },
-      },
-    },
-    {
-      type: "boss",
-      spawnRate: 1,
-      monsterStats: {
-        type: "boss",
-        health: 35,
-        damage: 2,
-        speed: 1.5,
-        scoreWorth: 2,
-        color: "green",
-        size: {
-          width: 7.5,
-          height: 7.5,
         },
       },
     },
@@ -355,46 +328,36 @@ export class MonsterWave {
   }
 
   static startSpawningOfMonsters() {
-    let monsterStartX;
-    let monsterStartY;
-    let timer = 1000;
+    setInterval(() => {
+      // THE SPAWNING OF THE MONSTER
 
-    while (timer > 0) {
-      timer -= 1;
-    }
+      let monsterStartX;
+      let monsterStartY;
+      let timer = 1000;
 
-    [monsterStartX, monsterStartY] = MonsterWave.getMonsterPos(
-      MonsterWave.currentMonster.type
-    );
+      while (timer > 0) {
+        timer -= 1;
+      }
 
-    let monster = new Monster(MonsterWave.currentMonster.monsterStats);
+      [monsterStartX, monsterStartY] = MonsterWave.getMonsterPos(
+        MonsterWave.currentMonster.type
+      );
 
-    monster.postion = {
-      x: monsterStartX,
-      y: monsterStartY,
-    };
-    GameList.addMonsterObject(monster);
-    MonsterWave.amoutOfSpawning++;
+      let monster = new Monster(MonsterWave.currentMonster.monsterStats);
 
-    if (MonsterWave.amoutOfSpawning > 10) {
-      MonsterWave.currentMonster = MonsterWave.typeOfMonster[1];
-    }
-    if (MonsterWave.amoutOfSpawning > 20) {
-      MonsterWave.currentMonster = MonsterWave.typeOfMonster[2];
-    }
-    MonsterWave.spawnRate = MonsterWave.currentMonster.spawnRate;
-    // THE SPAWNING OF THE MONSTER
-    // setInterval(() => {
-
-    // }, 10000);
+      monster.postion = {
+        x: monsterStartX,
+        y: monsterStartY,
+      };
+      GameList.addMonsterObject(monster);
+      MonsterWave.amoutOfSpawning++;
+    }, 100);
   }
 }
 // #region CLASS MONSTER
 class Monster extends GeneralObject {
   constructor(monsterStats) {
     super({
-      health: monsterStats.health,
-      damage: monsterStats.damage,
       speed: monsterStats.speed,
       color: monsterStats.color,
       size: {
@@ -412,7 +375,9 @@ class Monster extends GeneralObject {
       height: monsterStats.size.height,
     };
     this.stats.typeMonster = monsterStats.type;
+    this.stats.dealtDamage = false;
 
+    this.stats.scoreWorth = monsterStats.scoreWorth;
     this.movement = {
       direction: {
         x: 0,
@@ -426,14 +391,12 @@ class Monster extends GeneralObject {
   }
 
   move() {
-    let speedX;
-    let speedY;
     let angel;
     let monsterAngel = {
       x: 0,
       y: 0,
     };
-    let playerPos = GameList.getPlayerObject().middelPos();
+    let playerPos = GameList.playerObjectList[0].middelPos();
 
     angel = Math.atan2(
       playerPos.y - this.postion.y - this.stats.size.height / 2,
@@ -445,10 +408,6 @@ class Monster extends GeneralObject {
 
     this.postion.x += Math.round(monsterAngel.x * this.stats.speed);
     this.postion.y += Math.round(monsterAngel.y * this.stats.speed);
-  }
-
-  damagePlayer() {
-    GameList.getPlayerObject().takeDamage(this.stats.damage);
   }
 }
 
@@ -481,7 +440,12 @@ export class GameList {
   }
   static removeMonsterObject(object) {
     if (!(object instanceof Monster)) return;
-    GameList.monsterObjectList.filter((monster) => monster !== object);
+
+    let MonsterIndex = GameList.monsterObjectList.findIndex(
+      (monster) => monster === object
+    );
+
+    GameList.monsterObjectList.splice(MonsterIndex, 1);
   }
 
   static getBulletObjectList() {
@@ -553,30 +517,30 @@ class Collistion {
    * @param {Object} canvas - The canvas to check against.
    */
 
-  static ObjectOverlapping(object1, object2) {
-    let overlapping;
-
-    // Check if the object1 left axis is overlapping with the object2
-    if (object1.postion.x < object2.postion.x + object2.stats.size.width) {
-      overlapping = true;
+  static ObjectTouching(object1, object2) {
+    if (!object1 || !object2) {
+      return false;
     }
+    const object1Bounds = {
+      left: object1.postion.x,
+      top: object1.postion.y,
+      right: object1.postion.x + object1.stats.size.width,
+      bottom: object1.postion.y + object1.stats.size.height,
+    };
 
-    // Check if the object1 top axis is overlapping with the object2
-    if (object1.postion.y < object2.postion.y + object2.stats.size.height) {
-      overlapping = true;
-    }
+    const object2Bounds = {
+      left: object2.postion.x,
+      top: object2.postion.y,
+      right: object2.postion.x + object2.stats.size.width,
+      bottom: object2.postion.y + object2.stats.size.height,
+    };
 
-    // Check if the object1 right axis is overlapping with the object2
-    if (object1.postion.x + object1.stats.size.width > object2.postion.x) {
-      overlapping = true;
-    }
-
-    // Check if the object1 bottom axis is overlapping with the object2
-    if (object1.postion.y + object1.stats.size.height > object2.postion.y) {
-      overlapping = true;
-    }
-
-    return overlapping;
+    return (
+      object1Bounds.left < object2Bounds.right &&
+      object1Bounds.right > object2Bounds.left &&
+      object1Bounds.top < object2Bounds.bottom &&
+      object1Bounds.bottom > object2Bounds.top
+    );
   }
 
   static CheckCanvasBounds(object, canvas) {

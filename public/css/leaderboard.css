@@ -1,0 +1,24 @@
+/* Make so the leaderboard is centered and looks good on all devices and make it so the table is on 2 colums one that is for the username and one that is for the score */
+
+table {
+    outline: 1px solid black;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+    background-color: #5c5858;
+}
+

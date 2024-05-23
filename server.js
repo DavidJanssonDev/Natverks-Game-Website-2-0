@@ -12,6 +12,7 @@ const {
   isUserInDB,
   getUserFromDB,
   createUserInDB,
+  getScoreData,
 } = require("./database/helpingDatabaseFunctions");
 
 const {
@@ -77,6 +78,7 @@ app.get("/leaderboard", async function (_req, res) {
     username: _req.session.username,
     isLoggedIn: _req.session.isLoggedIn,
     page: "leaderboard",
+    leaderboardData: await getScoreData(),
   });
 });
 
@@ -251,14 +253,24 @@ app.post("/saveScore", async function (_req, res) {
   const { score } = _req.body;
   const { username } = _req.session;
 
-  if (!score || !username) {
-    console.log(`SCORE: ${score} USERNAME: ${username}`);
+  console.log(`NEW PLAYER SAVE SCORE ${score} USERNAME: ${username}`);
+
+  console.log(`NEW PLAYER SAVE SCORE ${score} USERNAME: ${username}`);
+
+  if (score === undefined) {
     res.status(400).json({
       saveScore: false,
       status: 400,
-      message: "Score not saved, missing score or name",
-      username: username,
-      score: score,
+      message: "Score not saved, missing score",
+    });
+    return;
+  }
+
+  if (username === undefined) {
+    res.status(400).json({
+      saveScore: false,
+      status: 400,
+      message: "Score not saved, missing username",
     });
     return;
   }

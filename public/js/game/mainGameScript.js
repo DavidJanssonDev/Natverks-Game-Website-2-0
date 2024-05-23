@@ -43,13 +43,13 @@ async function gameSetUp() {
   GameList.addPlayerObject(player);
 
   MonsterWave.startSpawningOfMonsters();
-  // gameLoop();
-
-  saveScoreToDB();
+  gameLoop();
 }
 
 async function saveScoreToDB() {
   const player = GameList.getPlayerObject();
+  console.table({ Player: player, Score: player.score });
+
   const server_response = await fetch("/saveScore", {
     method: "POST",
     headers: {
@@ -69,7 +69,12 @@ async function saveScoreToDB() {
 }
 
 function gameLoop() {
-  if (GameList.getPlayerObject().health <= 0) return;
+  console.log(GameList.getPlayerObject().stats.health);
+  if (GameList.getPlayerObject().stats.health <= 0) {
+    console.log("YOU DIED");
+    saveScoreToDB();
+    return;
+  }
 
   // GET A LIST WITH ALL THE OBJECTS
   const ObjectList = GameList.getObjectList();
