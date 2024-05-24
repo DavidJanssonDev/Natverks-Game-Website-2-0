@@ -1,10 +1,19 @@
 /* Make so the leaderboard is centered and looks good on all devices and make it so the table is on 2 colums one that is for the username and one that is for the score */
 
+.leaderboard-container {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.leaderboard-container > div > h1 {
+    text-align: center;
+}
+
 table {
+    flex: 1;
     outline: 1px solid black;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
+    width: 100%;
     border-collapse: collapse;
 }
 

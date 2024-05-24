@@ -14,10 +14,11 @@ async function createConectionDB() {
     user: "root",
     password: "",
     database: "betyggshogandeprojektdb",
+    multipleStatements: true,
   });
 }
 
-async function getScoreData() {
+async function getGeneralScoreData() {
   /**
    * Retrieves the top 10 scores from the database.
    *
@@ -29,6 +30,25 @@ async function getScoreData() {
   let sql = `SELECT username, score FROM users ORDER BY score DESC LIMIT 10`;
   let [result] = await connection.execute(sql);
   return result;
+}
+
+async function getPersonalScoreData(username) {
+  /**
+   * Retrieves the top 10 scores from the database for the specified username.
+   *
+   * @param {string} username - The username to retrieve scores for.
+   * @return {Promise} A Promise that resolves to an array of top 10 scores for the specified username.
+   */
+
+  const connection = await createConectionDB();
+  let sql = `SELECT id FROM users WHERE username = ?`;
+  let [result] = await connection.execute(sql, [username]);
+
+  sql = `SELECT * FROM score_table WHERE user_id = ? ORDER BY score DESC LIMIT 10`;
+
+  let [result2] = await connection.execute(sql, [result[0].id]);
+
+  return result2;
 }
 
 async function isUserInDB(connection, username) {
@@ -112,5 +132,6 @@ module.exports = {
   isUserInDB,
   getUserFromDB,
   createUserInDB,
-  getScoreData,
+  getGeneralScoreData,
+  getPersonalScoreData,
 };

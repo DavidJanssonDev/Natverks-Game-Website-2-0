@@ -1,8 +1,7 @@
 //* ---------------------------------------------------------------------
-//* SERVER SET UPP
+//region SERVER SET UPP
 const express = require("express");
 const session = require("express-session");
-const mysql = require("mysql2/promise");
 
 const Handelbars = require("express-handlebars");
 const bcrypt = require("bcrypt");
@@ -12,7 +11,8 @@ const {
   isUserInDB,
   getUserFromDB,
   createUserInDB,
-  getScoreData,
+  getGeneralScoreData,
+  getPersonalScoreData,
 } = require("./database/helpingDatabaseFunctions");
 
 const {
@@ -53,7 +53,7 @@ app.use(
 const USER_IS_LOGED_IN = false;
 
 // ---------------------------------------------------------------------
-// ROUTES WEBSITES
+// region GET ROUTES WEBSITES
 
 //~ Home Page
 app.get("/", async function (_req, res) {
@@ -73,12 +73,33 @@ app.get("/env", async function (_req, res) {
 
 app.get("/leaderboard", async function (_req, res) {
   if (!_req.session.isLoggedIn) return res.redirect("/");
+  let PersonalLeaderboardData = await getPersonalScoreData(
+    _req.session.username
+  );
+
+  const formattedLeaderboardData = PersonalLeaderboardData.map((item) => {
+    return {
+      scoer_id: item.id,
+      score: item.score,
+      formattedDate: item.date.toLocaleString("en-GB", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZone: "Europe/London",
+      }),
+    };
+  });
+
   res.render("leaderboard", {
     title: "Leaderboard Page",
     username: _req.session.username,
     isLoggedIn: _req.session.isLoggedIn,
     page: "leaderboard",
-    leaderboardData: await getScoreData(),
+    leaderboardData: await getGeneralScoreData(),
+    personalLeaderboardData: formattedLeaderboardData,
   });
 });
 
@@ -122,6 +143,7 @@ app.get("/login", async function (_req, res) {
   });
 });
 
+// ~ Backdoor
 app.get("/backdoor", async function (_req, res) {
   _req.session.isLoggedIn = true;
   _req.session.username = "user_1";
@@ -142,8 +164,8 @@ app.get("/signup", async function (_req, res) {
   });
 });
 
-// ---------------------------------------------------------------------
-//^ POST REQUESTS WEBSITES
+//* ---------------------------------------------------------------------
+// region POST REQUESTS WEBSITES
 
 //~ Login
 app.post("/login", async function (_req, res) {
@@ -250,8 +272,8 @@ app.post("/signup", async function (_req, res) {
 //~ Leaderboard save
 app.post("/saveScore", async function (_req, res) {
   const connection = await createConectionDB();
-  const { score } = _req.body;
-  const { username } = _req.session;
+  const { score, username, id } = _req.body;
+  // const { username, id } = _req.session;
 
   console.log(`NEW PLAYER SAVE SCORE ${score} USERNAME: ${username}`);
 
@@ -284,16 +306,63 @@ app.post("/saveScore", async function (_req, res) {
     return;
   }
 
-  const sql = `UPDATE users SET score = (?)
-  WHERE username = (?)`;
+  let sql = `UPDATE users SET score = (?) WHERE username = (?) AND score < (?)`;
+  const [result] = await connection.execute(sql, [score, username, score]);
 
-  const [result] = await connection.execute(sql, [score, username]);
+  sql = `INSERT INTO score_table (user_id, score) VALUES (?, ?)`;
+  const [result2] = await connection.execute(sql, [id, score]);
+
   return res.json({
     saveScore: true,
     status: 200,
     message: "Score saved",
     resultmessage: result.message,
   });
+});
+
+app.delete("/scores/:id", async function (_req, res) {
+  if (!_req.session.isLoggedIn) {
+    res.status(400).json({
+      deleteScore: false,
+      status: 400,
+      message: "Score not deleted, not logged in",
+    });
+    return;
+  }
+
+  const connection = await createConectionDB();
+  const scoreIdToDelete = _req.body.id;
+
+  let sql = `SELECT id FROM users WHERE username = (?)`;
+  const [result] = await connection.execute(sql, [_req.session.username]);
+
+  const userId = result[0].id;
+
+  sql = `DELETE FROM score_table WHERE id = (?)`;
+  const [result1] = await connection.execute(sql, [scoreIdToDelete]);
+
+  let sql2 = `SELECT MAX(score) as score FROM score_table WHERE user_id = (?)`;
+  const [result2] = await connection.execute(sql2, [userId]);
+
+  console.log(result2[0].score);
+
+  sql = `UPDATE users SET score = (?) WHERE id = (?)`;
+  const [result3] = await connection.execute(sql, [result2[0].score, userId]);
+
+  if (result && result2 && result3) {
+    res.json({
+      deleteScore: true,
+      status: 200,
+      message: "Score deleted",
+    });
+    return;
+  }
+  res.status(401).json({
+    deleteScore: false,
+    status: 400,
+    message: "Score not deleted",
+  });
+  return;
 });
 
 //* -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -
@@ -303,8 +372,8 @@ app.post("/gameSetup", function (_req, res) {
   res.json(process.env.PLAYER_DEAFULT_STATS);
 });
 
-// ---------------------------------------------------------------------
-//^ SERVER START
+//* ---------------------------------------------------------------------
+//region SERVER START
 
 //~ Start server
 app.listen(process.env.PORT, function () {

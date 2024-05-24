@@ -40,8 +40,8 @@ class GeneralObject {
     );
   }
 }
-// #region CLASS PLAYER
 
+// #region CLASS PLAYER
 export class Player extends GeneralObject {
   constructor(playerData) {
     super({
@@ -206,7 +206,6 @@ export class Player extends GeneralObject {
 }
 
 // #region CLASS BULLET
-
 class Bullet {
   constructor(bulletStats) {
     this.stats = {
@@ -271,7 +270,6 @@ class Bullet {
 }
 
 //#region MonsterWave Class
-
 export class MonsterWave {
   static typeOfMonster = [
     {
@@ -354,6 +352,7 @@ export class MonsterWave {
     }, 100);
   }
 }
+
 // #region CLASS MONSTER
 class Monster extends GeneralObject {
   constructor(monsterStats) {
@@ -411,8 +410,7 @@ class Monster extends GeneralObject {
   }
 }
 
-// #region  GameList
-
+// #region GameList
 export class GameList {
   static playerObjectList = [];
   static monsterObjectList = [];
@@ -521,6 +519,7 @@ class Collistion {
     if (!object1 || !object2) {
       return false;
     }
+
     const object1Bounds = {
       left: object1.postion.x,
       top: object1.postion.y,

@@ -1,9 +1,31 @@
 {{! Create a table with the leaderboard data from the server }}
-<table class="leaderboard-table">
-  {{#each leaderboardData}}
-    <tr>
-      <td>{{this.username}}</td>
-      <td>{{this.score}}</td>
-    </tr>
-  {{/each}}
-</table>
+<div class="leaderboard-container">
+
+  <div>
+    <h1>Leaderboard Table</h1>
+    <table title="Leaderboard Table" class="leaderboard-table">
+      {{#each leaderboardData}}
+        <tr>
+          <td>{{this.username}}</td>
+          <td>{{this.score}}</td>
+        </tr>
+      {{/each}}
+    </table>
+  </div>
+
+  <div>
+    <h1>Personal Leaderboard: {{username}}</h1>
+    <table title="Personal Leaderboard Table" class="leaderboard-table">
+      {{#each personalLeaderboardData}}
+        <tr>
+          <td>{{this.score}}</td>
+          <td>{{this.formattedDate}}</td>
+          <td><button
+              value="{{this.scoer_id}}"
+              class="delete-button"
+            >Delete</button></td>
+        </tr>
+      {{/each}}
+    </table>
+  </div>
+</div>
