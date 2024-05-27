@@ -272,8 +272,8 @@ app.post("/signup", async function (_req, res) {
 //~ Leaderboard save
 app.post("/saveScore", async function (_req, res) {
   const connection = await createConectionDB();
-  const { score, username, id } = _req.body;
-  // const { username, id } = _req.session;
+  const { score } = _req.body;
+  const { username } = _req.session;
 
   console.log(`NEW PLAYER SAVE SCORE ${score} USERNAME: ${username}`);
 
@@ -306,11 +306,16 @@ app.post("/saveScore", async function (_req, res) {
     return;
   }
 
-  let sql = `UPDATE users SET score = (?) WHERE username = (?) AND score < (?)`;
-  const [result] = await connection.execute(sql, [score, username, score]);
+  let sql = `SELECT id FROM users WHERE username = (?)`;
+  const [result] = await connection.execute(sql, [username]);
+
+  console.log("ID OF USER: " + result[0].id);
+
+  sql = `UPDATE users SET score = (?) WHERE username = (?) AND score < (?)`;
+  const [result1] = await connection.execute(sql, [score, username, score]);
 
   sql = `INSERT INTO score_table (user_id, score) VALUES (?, ?)`;
-  const [result2] = await connection.execute(sql, [id, score]);
+  const [result2] = await connection.execute(sql, [result[0].id, score]);
 
   return res.json({
     saveScore: true,
